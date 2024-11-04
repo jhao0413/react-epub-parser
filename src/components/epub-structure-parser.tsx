@@ -8,7 +8,7 @@ interface BookBasicInfo {
   date: string | null;
   coverPath: string | null;
   coverBlob: Blob | null;
-  toc: { text: string | null; content: string | null }[];
+  toc: { text: string | null; contentPath: string }[];
 }
 
 const XML_MIME_TYPE = "application/xml";
@@ -45,11 +45,11 @@ const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
         const coverFile = zip.file(`${basePath}${bookBasicInfo.coverPath}`);
         const [coverBlob, tocContent] = await Promise.all([
           coverFile?.async("blob") || null,
-          zip.file(tocPath as string)?.async("string"),
+          zip.file(`${basePath}${tocPath}` as string)?.async("string"),
         ]);
 
         bookBasicInfo.coverBlob = coverBlob;
-        bookBasicInfo.toc = parseToc(tocContent as string);
+        bookBasicInfo.toc = parseToc(tocContent as string, basePath as string);
         resolve(bookBasicInfo);
       } catch (error) {
         console.error("Error reading EPUB file:", error);
@@ -140,16 +140,18 @@ const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
   ];
 };
 
-const parseToc = (tocContent: string) => {
+const parseToc = (tocContent: string, basePath: string) => {
   const toc: { text: string | null; content: string | null }[] = [];
   const parser = new DOMParser();
   const tocDoc = parser.parseFromString(tocContent, XML_MIME_TYPE);
+  console.log(tocDoc);
   const navPoints = tocDoc.querySelectorAll("navPoint");
   navPoints.forEach((navPoint) => {
     const text = navPoint.querySelector("navLabel > text")?.textContent || null;
     const content =
       navPoint.querySelector("content")?.getAttribute("src") || null;
-    toc.push({ text, content });
+    const contentPath = `${basePath}${content}`;
+    toc.push({ text, contentPath });
   });
   return toc;
 };
