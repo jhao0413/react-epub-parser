@@ -8,7 +8,7 @@ interface BookBasicInfo {
   date: string | null;
   coverPath: string | null;
   coverBlob: Blob | null;
-  toc: { text: string | null; contentPath: string }[];
+  toc: { text: string | null; path: string; file: string }[];
 }
 
 const XML_MIME_TYPE = "application/xml";
@@ -151,7 +151,10 @@ const parseToc = (tocContent: string, basePath: string) => {
     const content =
       navPoint.querySelector("content")?.getAttribute("src") || null;
     const contentPath = `${basePath}${content}`;
-    toc.push({ text, contentPath });
+    const parts = contentPath.split("/");
+    const file = parts.pop();
+    const path = parts.join("/");
+    toc.push({ text, path, file });
   });
   return toc;
 };

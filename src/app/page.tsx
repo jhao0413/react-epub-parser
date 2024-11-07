@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-// import EpubReader from '@/components/test-epub-reader';
+import EpubReader from "@/components/test-epub-reader";
 import epubStructureParser from "@/components/epub-structure-parser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import "./reader.css";
+import "./page.css";
 
 interface FileInfo {
   name: string;
   size: number;
+  blob: Blob | null;
 }
 
 interface BookBasicInfo {
@@ -20,8 +21,8 @@ interface BookBasicInfo {
   date: string | null;
   coverPath: string | null;
   coverElement: HTMLImageElement | null;
-  coverBlob: Blob | null;
-  toc: { text: string | null; content: string | null }[];
+  coverBlob: Blob;
+  toc: { text: string | null; path: string; file: string }[];
 }
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
       setFileInfo({
         name: file.name,
         size: fileSizeInMB,
+        blob: getFileBinary(file),
       });
 
       const bookParserInfo = await epubStructureParser(file);
@@ -63,26 +65,22 @@ function App() {
     }
   };
 
-  const Toc = ({
-    bookBasicInfo,
-  }: {
-    bookBasicInfo: BookBasicInfo | undefined;
-  }) => {
-    if (!bookBasicInfo?.toc) {
-      return null;
-    }
+  function getFileBinary(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
 
-    return (
-      <div>
-        <p style={{ fontSize: "24px", fontWeight: "bold" }}>目录</p>
-        {bookBasicInfo.toc.map((item, index) => (
-          <div style={{ width: "65%", paddingTop: "10px" }} key={index}>
-            {item.text}
-          </div>
-        ))}
-      </div>
-    );
-  };
+      reader.onload = () => {
+        const arrayBuffer = reader.result;
+        resolve(arrayBuffer);
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Error reading file"));
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  }
 
   return (
     <div className="app">
@@ -103,15 +101,11 @@ function App() {
         </span>
       </div>
 
-      <div></div>
-
-      {/* <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ width: "50%", padding: "0 50px" }}>
-          <ul>
-            <Toc bookBasicInfo={bookBasicInfo} />
-          </ul>
-        </div>
-      </div> */}
+      <div style={{ height: "100%" }}>
+        {bookBasicInfo?.toc ? (
+          <EpubReader blob={fileInfo.blob} toc={bookBasicInfo?.toc} />
+        ) : null}
+      </div>
     </div>
   );
 }
