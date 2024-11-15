@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #text {
+            width: 80vw;
+            height: 80vh;
+            margin: auto;
+            columns: 2;
+            column-fill: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="text"></div>
+    <script>
+        const text = `
+         <h1 xmlns="http://www.w3.org/1999/xhtml" class="copyrightpage-title">版权信息</h1>
+
+      <p xmlns="http://www.w3.org/1999/xhtml">IWATASAN: IWATA SATORU WA KONNAKOTO WO HANASHITEITA.<br />
+      by Satoru Iwata and Hobonichi Co.,Ltd.,illustrated by 100%ORANGE<br />
+      Copyright©Satoru Iwata©Hobonichi,2019<br />
+      Illustrations copyright©100%ORANGE,2019<br />
+      All rights reserved.<br />
+      Original Japanese edition published by Hobonichi Co.,Ltd.<br />
+      This Simplified Chinese edition is published by arrangement with Hobonichi Co.,Ltd.,<br />
+      Tokyo in care of Tuttle-Mori Agency,Inc.,Tokyo through Pace Agency Ltd.,Jiangsu Province.<br />
+      著作权合同登记号　图字：10-2020-462号</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">书  名　岩田先生：任天堂传奇社长如是说</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">作  者　[日本]HOBO日刊ITOI新闻</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">译  者　李思园</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">责任编辑　刘静</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">出版发行　译林出版社</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">ISBN　　9787544787581</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">关注我们的微博：@译林出版社</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">关注我们的微信：yilinpress</p>
+
+      <p xmlns="http://www.w3.org/1999/xhtml" class="copyright-bodytext">意见反馈微信：YiLinPress1989</p>`
+
+      const div = document.getElementById('text')
+      div.innerHTML = text
+    </script>
+</body>
+</html>

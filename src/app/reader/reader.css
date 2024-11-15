@@ -9,7 +9,7 @@ body {
 
 .app {
     width: 80%;
-    height: 86vh;
+    height: 800px;
     padding: 50px;
     border-radius: 20px;
     position: relative;
@@ -18,11 +18,10 @@ body {
 
 .view {
     width: 100%;
-    height: 100%;
+    height: 660px;
     display: flex;
     justify-content: space-around;
     background-color: #FFF;
-    word-wrap: break-word;
 }
 
 .view img,
@@ -51,4 +50,8 @@ body {
 .titlePage {
     width: 50%;
     text-align: center;
+}
+
+* {
+    box-sizing: border-box;
 }
