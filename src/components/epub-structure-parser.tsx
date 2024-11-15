@@ -141,7 +141,7 @@ const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
 };
 
 const parseToc = (tocContent: string, basePath: string) => {
-  const toc: { text: string | null; content: string | null }[] = [];
+  const toc: { text: string | null; path: string; file: string }[] = [];
   const parser = new DOMParser();
   const tocDoc = parser.parseFromString(tocContent, XML_MIME_TYPE);
   console.log(tocDoc);
@@ -150,9 +150,9 @@ const parseToc = (tocContent: string, basePath: string) => {
     const text = navPoint.querySelector("navLabel > text")?.textContent || null;
     const content =
       navPoint.querySelector("content")?.getAttribute("src") || null;
-    const contentPath = `${basePath}${content}`;
+    const contentPath = content ? `${basePath}${content}` : "";
     const parts = contentPath.split("/");
-    const file = parts.pop();
+    const file = parts.pop() || "";
     const path = parts.join("/");
     toc.push({ text, path, file });
   });

@@ -13,7 +13,7 @@ type TocItem = {
 
 interface EpubReaderProps {
   toc: TocItem[];
-  blob: Blob;
+  blob: Blob | null;
 }
 
 const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
@@ -22,6 +22,9 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
+    if (!blob || !toc) {
+      return;
+    }
     JSZip.loadAsync(blob)
       .then((zip) => {
         const contentOpfPath = `${

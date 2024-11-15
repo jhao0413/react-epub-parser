@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import EpubReader from "@/components/test-epub-reader";
 import epubStructureParser from "@/components/epub-structure-parser";
 import { Button } from "@/components/ui/button";
@@ -20,15 +20,17 @@ interface BookBasicInfo {
   identifier: string | null;
   date: string | null;
   coverPath: string | null;
-  coverElement: HTMLImageElement | null;
-  coverBlob: Blob;
-  toc: { text: string | null; path: string; file: string }[];
+  toc: { text: string; path: string; file: string }[];
 }
 
 function App() {
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [bookBasicInfo, setBookBasicInfo] = useState<BookBasicInfo>();
-  const [fileInfo, setFileInfo] = useState<FileInfo>({ name: "", size: 0 });
+  const [fileInfo, setFileInfo] = useState<FileInfo>({
+    name: "",
+    size: 0,
+    blob: null,
+  });
 
   const handleButtonClick = () => {
     if (inputRef.current) {
@@ -36,17 +38,24 @@ function App() {
     }
   };
 
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    console.log(file);
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files) {
+      return;
+    }
+    const file = files[0];
+
     if (file) {
       const fileSizeInBytes = file.size;
       const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
 
+      const fileBlob = await getFileBinary(file);
       setFileInfo({
         name: file.name,
-        size: fileSizeInMB,
-        blob: getFileBinary(file),
+        size: parseFloat(fileSizeInMB),
+        blob: fileBlob as Blob,
       });
 
       const bookParserInfo = await epubStructureParser(file);
@@ -57,15 +66,16 @@ function App() {
         identifier: bookParserInfo?.identifier,
         date: bookParserInfo?.date,
         coverPath: bookParserInfo?.coverPath,
-        toc: bookParserInfo?.toc,
-        coverElement: bookParserInfo?.coverElement,
-        coverBlob: bookParserInfo?.coverBlob,
+        toc: bookParserInfo?.toc.map((item) => ({
+          ...item,
+          text: item.text || "",
+        })),
       });
       console.log(bookParserInfo);
     }
   };
 
-  function getFileBinary(file) {
+  function getFileBinary(file: Blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
