@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
-import DOMPurify from "dompurify";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type TocItem = {
   text: string;
@@ -44,11 +44,8 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
       .then(({ chapter }) => {
         const parser = new DOMParser();
         const chapterDoc = parser.parseFromString(chapter, "application/xml");
-        const body = chapterDoc.querySelector("body");
 
-        if (body) {
-          const safeHtmlString = DOMPurify.sanitize(body.innerHTML);
-
+        if (chapterDoc) {
           const renderer = document.getElementById(
             "epub-renderer"
           ) as HTMLIFrameElement;
@@ -57,8 +54,9 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           }
           const iframeDoc =
             renderer.contentDocument || renderer.contentWindow.document;
+
           iframeDoc.open();
-          iframeDoc.write(safeHtmlString);
+          iframeDoc.write(chapterDoc.documentElement.outerHTML);
           iframeDoc.close();
           const style = iframeDoc.createElement("style");
           style.innerHTML = `
@@ -88,7 +86,6 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   }, [blob, toc, currentChapter, pageCount]);
 
   const handleNextPage = () => {
-    console.log(currentPageIndex, pageCount);
     if (currentPageIndex < pageCount) {
       setCurrentPageIndex((currentPageIndex) => currentPageIndex + 1);
       const renderer = document.getElementById(
@@ -108,7 +105,26 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   };
 
   const handlePrevPage = () => {
-    setCurrentChapter((currentChapter) => currentChapter - 1);
+    if (currentPageIndex === 1 && currentChapter === 0) {
+      return;
+    }
+
+    if (currentPageIndex === 1 && currentChapter > 0) {
+      setCurrentChapter((currentChapter) => currentChapter - 1);
+    }
+
+    if (currentPageIndex > 1) {
+      const renderer = document.getElementById(
+        "epub-renderer"
+      ) as HTMLIFrameElement;
+      if (renderer && renderer.contentWindow) {
+        renderer.contentWindow.scrollTo({
+          left: -currentPageIndex * renderer.scrollWidth,
+        });
+      } else {
+        console.error("Renderer not found");
+      }
+    }
   };
 
   return (
@@ -125,10 +141,12 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
         }}
       >
         <Button variant="outline" onClick={handlePrevPage}>
+          <ChevronLeft />
           Previous
         </Button>
         <Button variant="outline" onClick={handleNextPage}>
           Next
+          <ChevronRight />
         </Button>
       </div>
     </div>
