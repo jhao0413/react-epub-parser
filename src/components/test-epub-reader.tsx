@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { resolvePath } from "@/lib/utils";
 
 type TocItem = {
   text: string;
@@ -41,7 +42,8 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           throw new Error("content.opf not found");
         }
       })
-      .then(({ chapter }) => {
+      .then(async ({ chapter, zip, basePath }) => {
+        console.log(basePath);
         const parser = new DOMParser();
         const chapterDoc = parser.parseFromString(chapter, "application/xml");
 
@@ -55,8 +57,38 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           const iframeDoc =
             renderer.contentDocument || renderer.contentWindow.document;
 
+          const xmlDoc = parser.parseFromString(
+            chapterDoc.documentElement.outerHTML,
+            "application/xml"
+          );
+          const links = xmlDoc.querySelectorAll('link[rel="stylesheet"]');
+          for (const link of Array.from(links)) {
+            const href = link.getAttribute("href") || "";
+            const resolvedPath = resolvePath(basePath, href);
+            const linkCssFile = zip.file(resolvedPath);
+            if (linkCssFile) {
+              const linkCss = await linkCssFile.async("blob");
+              const blobUrl = URL.createObjectURL(linkCss);
+              link.setAttribute("href", blobUrl);
+            }
+          }
+
+          const images = xmlDoc.querySelectorAll("img");
+          for (const img of Array.from(images)) {
+            const src = img.getAttribute("src") || "";
+            const resolvedPath = resolvePath(basePath, src);
+            const imgFile = zip.file(resolvedPath);
+            if (imgFile) {
+              const imgBlob = await imgFile.async("blob");
+              const blobUrl = URL.createObjectURL(imgBlob);
+              img.setAttribute("src", blobUrl);
+            }
+          }
+
+          const serializer = new XMLSerializer();
+          const updatedChapter = serializer.serializeToString(xmlDoc);
           iframeDoc.open();
-          iframeDoc.write(chapterDoc.documentElement.outerHTML);
+          iframeDoc.write(updatedChapter);
           iframeDoc.close();
           const style = iframeDoc.createElement("style");
           style.innerHTML = `
