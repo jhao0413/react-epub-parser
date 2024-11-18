@@ -21,6 +21,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pageCount, setPageCount] = useState(0);
+  const [goToLastPage, setGoToLastPage] = useState(false);
 
   useEffect(() => {
     if (!blob || !toc) {
@@ -110,28 +111,39 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
 
           setPageCount(Math.ceil(scrollWidth / columnWidth));
 
-          console.log(pageCount);
+          if (goToLastPage) {
+            setCurrentPageIndex(Math.ceil(scrollWidth / columnWidth));
+            renderer.contentWindow.scrollTo({
+              left:
+                (Math.ceil(scrollWidth / columnWidth) - 1) *
+                renderer.scrollWidth,
+            });
+            setGoToLastPage(false);
+          }
         } else {
           throw new Error("Body element not found in chapter document");
         }
       });
-  }, [blob, toc, currentChapter, pageCount]);
+  }, [blob, toc, currentChapter, pageCount, goToLastPage]);
 
   const handleNextPage = () => {
+    const renderer = document.getElementById(
+      "epub-renderer"
+    ) as HTMLIFrameElement;
+
+    if (!renderer?.contentWindow) {
+      console.error("Renderer not found");
+      return;
+    }
+
     if (currentPageIndex < pageCount) {
-      setCurrentPageIndex((currentPageIndex) => currentPageIndex + 1);
-      const renderer = document.getElementById(
-        "epub-renderer"
-      ) as HTMLIFrameElement;
-      if (renderer && renderer.contentWindow) {
-        renderer.contentWindow.scrollTo({
-          left: currentPageIndex * renderer.scrollWidth,
-        });
-      } else {
-        console.error("Renderer not found");
-      }
+      const newPageIndex = currentPageIndex + 1;
+      setCurrentPageIndex(newPageIndex);
+      renderer.contentWindow.scrollTo({
+        left: newPageIndex * renderer.scrollWidth,
+      });
     } else {
-      setCurrentChapter((currentChapter) => currentChapter + 1);
+      setCurrentChapter(currentChapter + 1);
       setCurrentPageIndex(1);
     }
   };
@@ -142,17 +154,17 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     }
 
     if (currentPageIndex === 1 && currentChapter > 0) {
-      setCurrentChapter((currentChapter) => currentChapter - 1);
-    }
-
-    if (currentPageIndex > 1) {
+      setCurrentChapter(currentChapter - 1);
+      setGoToLastPage(true);
+    } else if (currentPageIndex > 1) {
       const renderer = document.getElementById(
         "epub-renderer"
       ) as HTMLIFrameElement;
-      if (renderer && renderer.contentWindow) {
+      if (renderer?.contentWindow) {
         renderer.contentWindow.scrollTo({
-          left: -currentPageIndex * renderer.scrollWidth,
+          left: (currentPageIndex - 2) * renderer.scrollWidth,
         });
+        setCurrentPageIndex(currentPageIndex - 1);
       } else {
         console.error("Renderer not found");
       }

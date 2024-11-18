@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import EpubReader from "@/components/test-epub-reader";
+import EpubReader from "@/components/renderer";
 import epubStructureParser from "@/components/epub-structure-parser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
