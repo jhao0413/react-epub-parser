@@ -24,12 +24,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [goToLastPage, setGoToLastPage] = useState(false);
-  const [pageWidth, setPageWidth] = useState(0);
-  const pageWidthRef = useRef(pageWidth);
-
-  useEffect(() => {
-    pageWidthRef.current = pageWidth;
-  }, [pageWidth]);
+  const pageWidthRef = useRef(0);
 
   useEffect(() => {
     if (!blob || !toc) {
@@ -183,7 +178,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
                   body.clientWidth - marginLeft - marginRight + COLUMN_GAP;
 
                 if (newPageWidth !== pageWidthRef.current) {
-                  setPageWidth(newPageWidth);
+                  pageWidthRef.current = newPageWidth;
                 }
               }
             };
@@ -211,7 +206,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     }
 
     if (currentPageIndex < pageCount) {
-      const expectedScrollLeft = currentPageIndex * pageWidth;
+      const expectedScrollLeft = currentPageIndex * pageWidthRef.current;
       renderer.contentWindow.scrollTo({
         left: expectedScrollLeft,
       });
@@ -237,7 +232,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
       ) as HTMLIFrameElement;
       if (renderer?.contentWindow) {
         renderer.contentWindow.scrollTo({
-          left: (currentPageIndex - 2) * pageWidth,
+          left: (currentPageIndex - 2) * pageWidthRef.current,
         });
         setCurrentPageIndex(currentPageIndex - 1);
       } else {
