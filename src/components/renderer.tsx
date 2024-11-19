@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -17,11 +17,19 @@ interface EpubReaderProps {
   blob: Blob | null;
 }
 
+const COLUMN_GAP = 20;
+
 const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [goToLastPage, setGoToLastPage] = useState(false);
+  const [pageWidth, setPageWidth] = useState(0);
+  const pageWidthRef = useRef(pageWidth);
+
+  useEffect(() => {
+    pageWidthRef.current = pageWidth;
+  }, [pageWidth]);
 
   useEffect(() => {
     if (!blob || !toc) {
@@ -92,33 +100,99 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           iframeDoc.write(updatedChapter);
           iframeDoc.close();
           const style = iframeDoc.createElement("style");
+          const imgMaxWidth = renderer.scrollWidth
+            ? renderer.scrollWidth / 3.5
+            : 0;
           style.innerHTML = `
               body {
                 columns: 2;
                 column-fill: auto;
                 word-wrap: break-word;
                 overflow: hidden;
+                column-gap: 20px;
               }
 
               a {
                 text-decoration: none;
               }
+
+              img {
+                max-width: ${imgMaxWidth}px;
+                height: auto;
+              }
           `;
+
           iframeDoc.head.appendChild(style);
 
-          const scrollWidth = iframeDoc.body.scrollWidth;
-          const columnWidth = renderer?.scrollWidth;
-
-          setPageCount(Math.ceil(scrollWidth / columnWidth));
-
-          if (goToLastPage) {
-            setCurrentPageIndex(Math.ceil(scrollWidth / columnWidth));
-            renderer.contentWindow.scrollTo({
-              left:
-                (Math.ceil(scrollWidth / columnWidth) - 1) *
-                renderer.scrollWidth,
+          // wait for the images to load
+          const ifarmeImages = iframeDoc.images;
+          const imagesLoaded = Array.from(ifarmeImages).map((img) => {
+            return new Promise((resolve) => {
+              if (img.complete) {
+                resolve(undefined);
+              } else {
+                img.addEventListener("load", resolve);
+                img.addEventListener("error", resolve);
+              }
             });
-            setGoToLastPage(false);
+          });
+
+          Promise.all(imagesLoaded).then(() => {
+            if (!renderer?.contentWindow) {
+              console.error("Renderer not found");
+              return;
+            }
+
+            const scrollWidth = iframeDoc.body.scrollWidth;
+
+            setPageCount(
+              Math.ceil(
+                scrollWidth / (pageWidthRef.current || renderer.scrollWidth)
+              )
+            );
+
+            if (goToLastPage) {
+              setCurrentPageIndex(
+                Math.ceil(
+                  scrollWidth / (pageWidthRef.current || renderer.scrollWidth)
+                )
+              );
+              renderer.contentWindow.scrollTo({
+                left: (pageCount - 1) * renderer.scrollWidth,
+              });
+              setGoToLastPage(false);
+            }
+          });
+
+          if (renderer) {
+            const handleLoad = () => {
+              const iframeDoc =
+                renderer.contentDocument || renderer.contentWindow?.document;
+
+              if (!iframeDoc || !renderer.contentWindow) {
+                throw new Error("Iframe document not found");
+              }
+
+              if (iframeDoc && iframeDoc.body) {
+                const body = renderer.contentWindow.document.body;
+                const computedStyle =
+                  renderer.contentWindow.getComputedStyle(body);
+                const marginLeft = parseFloat(computedStyle.marginLeft);
+                const marginRight = parseFloat(computedStyle.marginRight);
+                const newPageWidth =
+                  body.clientWidth - marginLeft - marginRight + COLUMN_GAP;
+
+                if (newPageWidth !== pageWidthRef.current) {
+                  setPageWidth(newPageWidth);
+                }
+              }
+            };
+
+            renderer.addEventListener("load", handleLoad);
+
+            return () => {
+              renderer.removeEventListener("load", handleLoad);
+            };
           }
         } else {
           throw new Error("Body element not found in chapter document");
@@ -137,12 +211,13 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     }
 
     if (currentPageIndex < pageCount) {
+      const expectedScrollLeft = currentPageIndex * pageWidth;
+      renderer.contentWindow.scrollTo({
+        left: expectedScrollLeft,
+      });
       const newPageIndex = currentPageIndex + 1;
       setCurrentPageIndex(newPageIndex);
-      renderer.contentWindow.scrollTo({
-        left: newPageIndex * renderer.scrollWidth,
-      });
-    } else {
+    } else if (currentChapter < toc.length - 1) {
       setCurrentChapter(currentChapter + 1);
       setCurrentPageIndex(1);
     }
@@ -162,7 +237,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
       ) as HTMLIFrameElement;
       if (renderer?.contentWindow) {
         renderer.contentWindow.scrollTo({
-          left: (currentPageIndex - 2) * renderer.scrollWidth,
+          left: (currentPageIndex - 2) * pageWidth,
         });
         setCurrentPageIndex(currentPageIndex - 1);
       } else {
