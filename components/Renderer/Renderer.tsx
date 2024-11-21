@@ -30,188 +30,204 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     if (!blob || !toc) {
       return;
     }
-    JSZip.loadAsync(blob)
-      .then((zip) => {
-        const contentOpfPath = `${
-          toc[currentChapter].path ? toc[currentChapter].path + "/" : ""
-        }${decodeURIComponent(toc[currentChapter].file)}`;
-        const chapter = zip.file(contentOpfPath);
-        if (chapter) {
-          return chapter.async("string").then((chapter) => ({
-            chapter,
-            zip,
-            basePath: toc[currentChapter].path,
-          }));
-        } else {
-          throw new Error("content.opf not found");
+
+    const loadChapterContent = async (zip: JSZip) => {
+      const contentOpfPath = `${
+        toc[currentChapter].path ? toc[currentChapter].path + "/" : ""
+      }${decodeURIComponent(toc[currentChapter].file)}`;
+      const chapterFile = zip.file(contentOpfPath);
+      if (chapterFile) {
+        const chapterContent = await chapterFile.async("string");
+        return {
+          chapterContent,
+          zip,
+          basePath: toc[currentChapter].path,
+        };
+      } else {
+        throw new Error("Content file not found");
+      }
+    };
+
+    const parseAndProcessChapter = async (chapterContent: string, zip: JSZip, basePath: string) => {
+      const parser = new DOMParser();
+      const chapterDoc = parser.parseFromString(chapterContent, "application/xml");
+
+      if (!chapterDoc) {
+        throw new Error("Failed to parse chapter content");
+      }
+
+      const xmlDoc = parser.parseFromString(
+        chapterDoc.documentElement.outerHTML,
+        "application/xml"
+      );
+
+      // process link tags
+      const links = xmlDoc.querySelectorAll('link[rel="stylesheet"]');
+      for (const link of Array.from(links)) {
+        const href = link.getAttribute("href") || "";
+        const resolvedPath = resolvePath(basePath, href);
+        const linkCssFile = zip.file(resolvedPath);
+        if (linkCssFile) {
+          const linkCss = await linkCssFile.async("blob");
+          const blobUrl = URL.createObjectURL(linkCss);
+          link.setAttribute("href", blobUrl);
         }
-      })
-      .then(async ({ chapter, zip, basePath }) => {
-        console.log(basePath);
-        const parser = new DOMParser();
-        const chapterDoc = parser.parseFromString(chapter, "application/xml");
+      }
 
-        if (chapterDoc) {
-          const renderer = document.getElementById(
-            "epub-renderer"
-          ) as HTMLIFrameElement;
-          if (!renderer || !renderer.contentWindow) {
-            throw new Error("Renderer not found");
+      // process img tags
+      const images = xmlDoc.querySelectorAll("img");
+      for (const img of Array.from(images)) {
+        const src = img.getAttribute("src") || "";
+        const resolvedPath = resolvePath(basePath, src);
+        const imgFile = zip.file(resolvedPath);
+        if (imgFile) {
+          const imgBlob = await imgFile.async("blob");
+          const blobUrl = URL.createObjectURL(imgBlob);
+          img.setAttribute("src", blobUrl);
+        }
+      }
+
+      const serializer = new XMLSerializer();
+      const updatedChapter = serializer.serializeToString(xmlDoc);
+      return updatedChapter;
+    };
+
+    const writeToIframe = (updatedChapter: string) => {
+      const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+      if (!renderer || !renderer.contentWindow) {
+        throw new Error("Renderer not found");
+      }
+      const iframeDoc =
+        renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+      iframeDoc.open();
+      iframeDoc.write(updatedChapter);
+      iframeDoc.close();
+
+      const style = iframeDoc.createElement("style");
+      const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
+      style.innerHTML = `
+        body {
+          columns: 2;
+          column-fill: auto;
+          word-wrap: break-word;
+          overflow: hidden;
+          column-gap: 20px;
+        }
+  
+        a {
+          text-decoration: none;
+        }
+  
+        img {
+          max-width: ${imgMaxWidth}px;
+          height: auto;
+        }
+      `;
+      iframeDoc.head.appendChild(style);
+      return renderer;
+    };
+
+    const waitForImagesAndCalculatePages = (renderer: HTMLIFrameElement, iframeDoc: Document) => {
+      const iframeImages = iframeDoc.images;
+      const imagesLoaded = Array.from(iframeImages).map((img) => {
+        return new Promise((resolve) => {
+          if (img.complete) {
+            resolve(undefined);
+          } else {
+            img.addEventListener("load", resolve);
+            img.addEventListener("error", resolve);
           }
-          const iframeDoc =
-            renderer.contentDocument || renderer.contentWindow.document;
+        });
+      });
 
-          const xmlDoc = parser.parseFromString(
-            chapterDoc.documentElement.outerHTML,
-            "application/xml"
+      Promise.all(imagesLoaded).then(() => {
+        if (!renderer?.contentWindow) {
+          console.error("Renderer not found");
+          return;
+        }
+
+        const scrollWidth = iframeDoc.body.scrollWidth;
+
+        setPageCount(Math.ceil(scrollWidth / (pageWidthRef.current || renderer.scrollWidth)));
+
+        if (goToLastPage) {
+          setCurrentPageIndex(
+            Math.ceil(scrollWidth / (pageWidthRef.current || renderer.scrollWidth))
           );
-          const links = xmlDoc.querySelectorAll('link[rel="stylesheet"]');
-          for (const link of Array.from(links)) {
-            const href = link.getAttribute("href") || "";
-            const resolvedPath = resolvePath(basePath, href);
-            const linkCssFile = zip.file(resolvedPath);
-            if (linkCssFile) {
-              const linkCss = await linkCssFile.async("blob");
-              const blobUrl = URL.createObjectURL(linkCss);
-              link.setAttribute("href", blobUrl);
-            }
-          }
-
-          const images = xmlDoc.querySelectorAll("img");
-          for (const img of Array.from(images)) {
-            const src = img.getAttribute("src") || "";
-            const resolvedPath = resolvePath(basePath, src);
-            const imgFile = zip.file(resolvedPath);
-            if (imgFile) {
-              const imgBlob = await imgFile.async("blob");
-              const blobUrl = URL.createObjectURL(imgBlob);
-              img.setAttribute("src", blobUrl);
-            }
-          }
-
-          const serializer = new XMLSerializer();
-          const updatedChapter = serializer.serializeToString(xmlDoc);
-          iframeDoc.open();
-          iframeDoc.write(updatedChapter);
-          iframeDoc.close();
-          const style = iframeDoc.createElement("style");
-          const imgMaxWidth = renderer.scrollWidth
-            ? renderer.scrollWidth / 3.5
-            : 0;
-          style.innerHTML = `
-              body {
-                columns: 2;
-                column-fill: auto;
-                word-wrap: break-word;
-                overflow: hidden;
-                column-gap: 20px;
-              }
-
-              a {
-                text-decoration: none;
-              }
-
-              img {
-                max-width: ${imgMaxWidth}px;
-                height: auto;
-              }
-          `;
-
-          iframeDoc.head.appendChild(style);
-
-          // wait for the images to load
-          const ifarmeImages = iframeDoc.images;
-          const imagesLoaded = Array.from(ifarmeImages).map((img) => {
-            return new Promise((resolve) => {
-              if (img.complete) {
-                resolve(undefined);
-              } else {
-                img.addEventListener("load", resolve);
-                img.addEventListener("error", resolve);
-              }
-            });
+          renderer.contentWindow.scrollTo({
+            left: pageCount * renderer.scrollWidth,
           });
-
-          Promise.all(imagesLoaded).then(() => {
-            if (!renderer?.contentWindow) {
-              console.error("Renderer not found");
-              return;
-            }
-
-            const scrollWidth = iframeDoc.body.scrollWidth;
-
-            setPageCount(
-              Math.ceil(
-                scrollWidth / (pageWidthRef.current || renderer.scrollWidth)
-              )
-            );
-
-            if (goToLastPage) {
-              setCurrentPageIndex(
-                Math.ceil(
-                  scrollWidth / (pageWidthRef.current || renderer.scrollWidth)
-                )
-              );
-              renderer.contentWindow.scrollTo({
-                left: (pageCount - 1) * renderer.scrollWidth,
-              });
-              setGoToLastPage(false);
-            }
-          });
-
-          if (renderer) {
-            const handleLoad = () => {
-              const iframeDoc =
-                renderer.contentDocument || renderer.contentWindow?.document;
-
-              if (!iframeDoc || !renderer.contentWindow) {
-                throw new Error("Iframe document not found");
-              }
-
-              if (iframeDoc && iframeDoc.body) {
-                const body = renderer.contentWindow.document.body;
-                const computedStyle =
-                  renderer.contentWindow.getComputedStyle(body);
-                const marginLeft = parseFloat(computedStyle.marginLeft);
-                const marginRight = parseFloat(computedStyle.marginRight);
-                const newPageWidth =
-                  body.clientWidth - marginLeft - marginRight + COLUMN_GAP;
-
-                if (newPageWidth !== pageWidthRef.current) {
-                  pageWidthRef.current = newPageWidth;
-                }
-              }
-            };
-
-            renderer.addEventListener("load", handleLoad);
-
-            return () => {
-              renderer.removeEventListener("load", handleLoad);
-            };
-          }
-        } else {
-          throw new Error("Body element not found in chapter document");
+          setGoToLastPage(false);
         }
+      });
+    };
+
+    const handleIframeLoad = (renderer: HTMLIFrameElement) => {
+      const handleLoad = () => {
+        const iframeDoc = renderer.contentDocument || renderer.contentWindow?.document;
+
+        if (!iframeDoc || !renderer.contentWindow) {
+          throw new Error("Iframe document not found");
+        }
+
+        if (iframeDoc && iframeDoc.body) {
+          const body = renderer.contentWindow.document.body;
+          const computedStyle = renderer.contentWindow.getComputedStyle(body);
+          const marginLeft = parseFloat(computedStyle.marginLeft);
+          const marginRight = parseFloat(computedStyle.marginRight);
+          const newPageWidth = body.clientWidth - marginLeft - marginRight + COLUMN_GAP;
+
+          if (newPageWidth !== pageWidthRef.current) {
+            pageWidthRef.current = newPageWidth;
+          }
+        }
+      };
+
+      renderer.addEventListener("load", handleLoad);
+
+      return () => {
+        renderer.removeEventListener("load", handleLoad);
+      };
+    };
+
+    JSZip.loadAsync(blob)
+      .then(async (zip) => {
+        const { chapterContent, zip: loadedZip, basePath } = await loadChapterContent(zip);
+        const updatedChapter = await parseAndProcessChapter(chapterContent, loadedZip, basePath);
+        const renderer = writeToIframe(updatedChapter);
+        const iframeDoc =
+          renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+        if (iframeDoc) {
+          waitForImagesAndCalculatePages(renderer, iframeDoc);
+        } else {
+          console.error("Iframe document not found");
+        }
+        return handleIframeLoad(renderer);
+      })
+      .catch((error) => {
+        console.error(error);
       });
   }, [blob, toc, currentChapter, pageCount, goToLastPage]);
 
-  const handleNextPage = () => {
-    const renderer = document.getElementById(
-      "epub-renderer"
-    ) as HTMLIFrameElement;
-
-    if (!renderer?.contentWindow) {
+  const getRendererWindow = () => {
+    const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+    if (renderer?.contentWindow) {
+      return renderer.contentWindow;
+    } else {
       console.error("Renderer not found");
-      return;
+      return null;
     }
+  };
+
+  const handleNextPage = () => {
+    const rendererWindow = getRendererWindow();
+    if (!rendererWindow) return;
 
     if (currentPageIndex < pageCount) {
-      const expectedScrollLeft = currentPageIndex * pageWidthRef.current;
-      renderer.contentWindow.scrollTo({
-        left: expectedScrollLeft,
+      rendererWindow.scrollTo({
+        left: currentPageIndex * pageWidthRef.current,
       });
-      const newPageIndex = currentPageIndex + 1;
-      setCurrentPageIndex(newPageIndex);
+      setCurrentPageIndex(currentPageIndex + 1);
     } else if (currentChapter < toc.length - 1) {
       setCurrentChapter(currentChapter + 1);
       setCurrentPageIndex(1);
@@ -227,26 +243,19 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
       setCurrentChapter(currentChapter - 1);
       setGoToLastPage(true);
     } else if (currentPageIndex > 1) {
-      const renderer = document.getElementById(
-        "epub-renderer"
-      ) as HTMLIFrameElement;
-      if (renderer?.contentWindow) {
-        renderer.contentWindow.scrollTo({
-          left: (currentPageIndex - 2) * pageWidthRef.current,
-        });
-        setCurrentPageIndex(currentPageIndex - 1);
-      } else {
-        console.error("Renderer not found");
-      }
+      const rendererWindow = getRendererWindow();
+      if (!rendererWindow) return;
+
+      rendererWindow.scrollTo({
+        left: (currentPageIndex - 2) * pageWidthRef.current,
+      });
+      setCurrentPageIndex(currentPageIndex - 1);
     }
   };
 
   return (
     <div style={{ height: "100%" }}>
-      <iframe
-        id="epub-renderer"
-        style={{ width: "100%", height: "100%" }}
-      ></iframe>
+      <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
       <div
         style={{
           width: "100%",
@@ -262,6 +271,9 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           Next
           <ChevronRight />
         </Button>
+      </div>
+      <div>
+        {currentPageIndex}/{pageCount}
       </div>
     </div>
   );
