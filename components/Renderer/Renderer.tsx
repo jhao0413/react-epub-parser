@@ -44,6 +44,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
         } else {
           console.error("Iframe document not found");
         }
+
         return handleIframeLoad(renderer);
       })
       .catch((error) => {
@@ -168,6 +169,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     };
 
     const handleIframeLoad = (renderer: HTMLIFrameElement) => {
+      renderer.style.visibility = "hidden";
       const handleLoad = () => {
         const iframeDoc = renderer.contentDocument || renderer.contentWindow?.document;
 
@@ -186,14 +188,23 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
             pageWidthRef.current = newPageWidth;
           }
 
-          const scrollWidth = iframeDoc.body.scrollWidth;
+          let scrollWidth = iframeDoc.body.scrollWidth;
+          const ratio = scrollWidth / pageWidthRef.current;
+          const fraction = ratio - Math.floor(ratio);
+
+          // add an empty div to the end of the content if the last page is less than half full
+          if (fraction <= 0.5) {
+            const emptyDiv = renderer.contentWindow.document.createElement("div");
+            emptyDiv.style.height = "100%";
+            body.appendChild(emptyDiv);
+          }
 
           pageCountRef.current = Math.ceil(scrollWidth / pageWidthRef.current);
           setPageCount(pageCountRef.current);
 
           if (goToLastPageRef.current) {
             renderer.contentWindow.scrollTo({
-              left: scrollWidth,
+              left: (pageCountRef.current - 1) * pageWidthRef.current,
             });
             goToLastPageRef.current = false;
             setCurrentPageIndex(Math.ceil(scrollWidth / pageWidthRef.current));
@@ -202,14 +213,13 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
               left: 0,
             });
           }
+          renderer.style.visibility = "visible";
+
+          renderer.removeEventListener("load", handleLoad);
         }
       };
 
       renderer.addEventListener("load", handleLoad);
-
-      return () => {
-        renderer.removeEventListener("load", handleLoad);
-      };
     };
   }, [blob, toc, currentChapter]);
 
@@ -233,8 +243,8 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
       });
       setCurrentPageIndex(currentPageIndex + 1);
     } else if (currentChapter < toc.length - 1) {
-      setCurrentChapter(currentChapter + 1);
       setCurrentPageIndex(1);
+      setCurrentChapter(currentChapter + 1);
     }
   };
 
