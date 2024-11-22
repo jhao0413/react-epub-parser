@@ -22,14 +22,33 @@ const COLUMN_GAP = 20;
 const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
-  const [pageCount, setPageCount] = useState(0);
-  const [goToLastPage, setGoToLastPage] = useState(false);
+  const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
+  const pageCountRef = useRef(0);
+  const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
     if (!blob || !toc) {
       return;
     }
+
+    JSZip.loadAsync(blob)
+      .then(async (zip) => {
+        const { chapterContent, zip: loadedZip, basePath } = await loadChapterContent(zip);
+        const updatedChapter = await parseAndProcessChapter(chapterContent, loadedZip, basePath);
+        const renderer = writeToIframe(updatedChapter);
+        const iframeDoc =
+          renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+        if (iframeDoc) {
+          waitForImagesAndCalculatePages(renderer, iframeDoc);
+        } else {
+          console.error("Iframe document not found");
+        }
+        return handleIframeLoad(renderer);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
 
     const loadChapterContent = async (zip: JSZip) => {
       const contentOpfPath = `${
@@ -145,20 +164,6 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           console.error("Renderer not found");
           return;
         }
-
-        const scrollWidth = iframeDoc.body.scrollWidth;
-
-        setPageCount(Math.ceil(scrollWidth / (pageWidthRef.current || renderer.scrollWidth)));
-
-        if (goToLastPage) {
-          setCurrentPageIndex(
-            Math.ceil(scrollWidth / (pageWidthRef.current || renderer.scrollWidth))
-          );
-          renderer.contentWindow.scrollTo({
-            left: pageCount * renderer.scrollWidth,
-          });
-          setGoToLastPage(false);
-        }
       });
     };
 
@@ -170,7 +175,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           throw new Error("Iframe document not found");
         }
 
-        if (iframeDoc && iframeDoc.body) {
+        if (iframeDoc.body) {
           const body = renderer.contentWindow.document.body;
           const computedStyle = renderer.contentWindow.getComputedStyle(body);
           const marginLeft = parseFloat(computedStyle.marginLeft);
@@ -179,6 +184,23 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
 
           if (newPageWidth !== pageWidthRef.current) {
             pageWidthRef.current = newPageWidth;
+          }
+
+          const scrollWidth = iframeDoc.body.scrollWidth;
+
+          pageCountRef.current = Math.ceil(scrollWidth / pageWidthRef.current);
+          setPageCount(pageCountRef.current);
+
+          if (goToLastPageRef.current) {
+            renderer.contentWindow.scrollTo({
+              left: scrollWidth,
+            });
+            goToLastPageRef.current = false;
+            setCurrentPageIndex(Math.ceil(scrollWidth / pageWidthRef.current));
+          } else {
+            renderer.contentWindow.scrollTo({
+              left: 0,
+            });
           }
         }
       };
@@ -189,25 +211,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
         renderer.removeEventListener("load", handleLoad);
       };
     };
-
-    JSZip.loadAsync(blob)
-      .then(async (zip) => {
-        const { chapterContent, zip: loadedZip, basePath } = await loadChapterContent(zip);
-        const updatedChapter = await parseAndProcessChapter(chapterContent, loadedZip, basePath);
-        const renderer = writeToIframe(updatedChapter);
-        const iframeDoc =
-          renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-        if (iframeDoc) {
-          waitForImagesAndCalculatePages(renderer, iframeDoc);
-        } else {
-          console.error("Iframe document not found");
-        }
-        return handleIframeLoad(renderer);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, [blob, toc, currentChapter, pageCount, goToLastPage]);
+  }, [blob, toc, currentChapter]);
 
   const getRendererWindow = () => {
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
@@ -223,7 +227,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     const rendererWindow = getRendererWindow();
     if (!rendererWindow) return;
 
-    if (currentPageIndex < pageCount) {
+    if (currentPageIndex < pageCountRef.current) {
       rendererWindow.scrollTo({
         left: currentPageIndex * pageWidthRef.current,
       });
@@ -240,8 +244,8 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
     }
 
     if (currentPageIndex === 1 && currentChapter > 0) {
+      goToLastPageRef.current = true;
       setCurrentChapter(currentChapter - 1);
-      setGoToLastPage(true);
     } else if (currentPageIndex > 1) {
       const rendererWindow = getRendererWindow();
       if (!rendererWindow) return;
