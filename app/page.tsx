@@ -14,7 +14,7 @@ interface FileInfo {
 }
 
 interface BookBasicInfo {
-  title: string | null;
+  title: string;
   creator: string | null;
   publisher: string | null;
   identifier: string | null;
@@ -25,11 +25,12 @@ interface BookBasicInfo {
 
 function App() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [bookBasicInfo, setBookBasicInfo] = useState<BookBasicInfo>();
-  const [fileInfo, setFileInfo] = useState<FileInfo>({
-    name: "",
-    size: 0,
-    blob: null,
+  const [fileState, setFileState] = useState<{
+    fileInfo: FileInfo;
+    bookBasicInfo: BookBasicInfo | null;
+  }>({
+    fileInfo: { name: "", size: 0, blob: null },
+    bookBasicInfo: null,
   });
 
   const handleButtonClick = () => {
@@ -38,9 +39,7 @@ function App() {
     }
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) {
       return;
@@ -52,26 +51,15 @@ function App() {
       const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
 
       const fileBlob = await getFileBinary(file);
-      setFileInfo({
-        name: file.name,
-        size: parseFloat(fileSizeInMB),
-        blob: fileBlob as Blob,
-      });
-
       const bookParserInfo = await epubStructureParser(file);
-      setBookBasicInfo({
-        title: bookParserInfo.title,
-        creator: bookParserInfo?.creator,
-        publisher: bookParserInfo?.publisher,
-        identifier: bookParserInfo?.identifier,
-        date: bookParserInfo?.date,
-        coverPath: bookParserInfo?.coverPath,
-        toc: bookParserInfo?.toc.map((item) => ({
-          ...item,
-          text: item.text || "",
-        })),
+      setFileState({
+        fileInfo: {
+          name: file.name,
+          size: parseFloat(fileSizeInMB),
+          blob: fileBlob as Blob,
+        },
+        bookBasicInfo: { ...bookParserInfo },
       });
-      console.log(bookParserInfo);
     }
   };
 
@@ -107,13 +95,14 @@ function App() {
           Select EPUB
         </Button>
         <span style={{ marginLeft: "10px" }}>
-          {fileInfo.name} {fileInfo.name ? fileInfo.size + "MB" : null}
+          {fileState.fileInfo.name}{" "}
+          {fileState.fileInfo.name ? `${fileState.fileInfo.size}MB` : null}
         </span>
       </div>
 
       <div style={{ height: "100%" }}>
-        {bookBasicInfo?.toc ? (
-          <EpubReader blob={fileInfo.blob} toc={bookBasicInfo?.toc} />
+        {fileState.bookBasicInfo?.toc ? (
+          <EpubReader blob={fileState.fileInfo.blob} bookBasicInfo={fileState.bookBasicInfo} />
         ) : null}
       </div>
     </div>

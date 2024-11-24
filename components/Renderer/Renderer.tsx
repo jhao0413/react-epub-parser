@@ -5,30 +5,35 @@ import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { resolvePath } from "@/lib/utils";
+import Menu from "@/components/Renderer/Menu";
 
-type TocItem = {
-  text: string;
-  path: string;
-  file: string;
-};
+interface BookBasicInfo {
+  title: string | null;
+  creator: string | null;
+  publisher: string | null;
+  identifier: string | null;
+  date: string | null;
+  coverBlob: Blob;
+  coverPath: string | null;
+  toc: { text: string; path: string; file: string }[];
+}
 
 interface EpubReaderProps {
-  toc: TocItem[];
   blob: Blob | null;
+  bookBasicInfo: BookBasicInfo;
 }
 
 const COLUMN_GAP = 20;
 
-const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
+const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
-  const [pageCount, setPageCount] = useState(0);
 
   useEffect(() => {
-    if (!blob || !toc) {
+    if (!blob || !bookBasicInfo.toc) {
       return;
     }
 
@@ -53,15 +58,15 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
 
     const loadChapterContent = async (zip: JSZip) => {
       const contentOpfPath = `${
-        toc[currentChapter].path ? toc[currentChapter].path + "/" : ""
-      }${decodeURIComponent(toc[currentChapter].file)}`;
+        bookBasicInfo.toc[currentChapter].path ? bookBasicInfo.toc[currentChapter].path + "/" : ""
+      }${decodeURIComponent(bookBasicInfo.toc[currentChapter].file)}`;
       const chapterFile = zip.file(contentOpfPath);
       if (chapterFile) {
         const chapterContent = await chapterFile.async("string");
         return {
           chapterContent,
           zip,
-          basePath: toc[currentChapter].path,
+          basePath: bookBasicInfo.toc[currentChapter].path,
         };
       } else {
         throw new Error("Content file not found");
@@ -200,7 +205,6 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           }
 
           pageCountRef.current = Math.ceil(scrollWidth / pageWidthRef.current);
-          setPageCount(pageCountRef.current);
 
           if (goToLastPageRef.current) {
             renderer.contentWindow.scrollTo({
@@ -221,7 +225,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
 
       renderer.addEventListener("load", handleLoad);
     };
-  }, [blob, toc, currentChapter]);
+  }, [blob, bookBasicInfo.toc, currentChapter]);
 
   const getRendererWindow = () => {
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
@@ -242,7 +246,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
         left: currentPageIndex * pageWidthRef.current,
       });
       setCurrentPageIndex(currentPageIndex + 1);
-    } else if (currentChapter < toc.length - 1) {
+    } else if (currentChapter < bookBasicInfo.toc.length - 1) {
       setCurrentPageIndex(1);
       setCurrentChapter(currentChapter + 1);
     }
@@ -268,7 +272,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
   };
 
   return (
-    <div style={{ height: "100%" }}>
+    <div style={{ height: "100%", position: "relative" }}>
       <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
       <div
         style={{
@@ -286,8 +290,12 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, toc }) => {
           <ChevronRight />
         </Button>
       </div>
-      <div>
-        {currentPageIndex}/{pageCount}
+      <div style={{ position: "absolute", right: "-120px", bottom: "0px" }}>
+        <Menu
+          bookBasicInfo={bookBasicInfo}
+          currentChapter={currentChapter}
+          setCurrentChapter={setCurrentChapter}
+        />
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
 import JSZip from "jszip";
 
 interface BookBasicInfo {
-  title: string | null;
-  creator: string | null;
-  publisher: string | null;
-  identifier: string | null;
-  date: string | null;
-  coverPath: string | null;
+  title: string;
+  creator: string;
+  publisher: string;
+  identifier: string;
+  date: string;
+  coverPath: string;
   coverBlob: Blob | null;
-  toc: { text: string | null; path: string; file: string }[];
+  toc: { text: string; path: string; file: string }[];
 }
 
 const XML_MIME_TYPE = "application/xml";
@@ -23,9 +23,7 @@ const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
         const zip = await JSZip.loadAsync(arrayBuffer);
 
         // Read container.xml to get the path of content.opf
-        const containerContent = await zip
-          .file("META-INF/container.xml")
-          ?.async("string");
+        const containerContent = await zip.file("META-INF/container.xml")?.async("string");
         const fullPath = parseContentOpfPath(containerContent as string);
         const basePath = fullPath?.split("content.opf")[0];
 
@@ -43,8 +41,13 @@ const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
 
         // Read cover image and toc
         const coverFile = zip.file(`${basePath}${bookBasicInfo.coverPath}`);
+
+        if (!coverFile) {
+          throw new Error("Failed to find cover image in EPUB structure.");
+        }
+
         const [coverBlob, tocContent] = await Promise.all([
-          coverFile?.async("blob") || null,
+          coverFile.async("blob"),
           zip.file(`${basePath}${tocPath}` as string)?.async("string"),
         ]);
 
@@ -81,48 +84,48 @@ const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(content, XML_MIME_TYPE);
 
+  if (!xmlDoc) {
+    throw new Error("Failed to parse content.opf XML.");
+  }
+
   const getTitle = () => {
     const titleElement = xmlDoc.querySelector("metadata > title");
-    return titleElement ? titleElement.textContent : null;
+    return titleElement?.textContent || "";
   };
 
   const getCreator = () => {
     const creatorElement = xmlDoc.querySelector("metadata > creator");
-    return creatorElement ? creatorElement.textContent : null;
+    return creatorElement?.textContent || "";
   };
 
   const getPublisher = () => {
     const publisherElement = xmlDoc.querySelector("metadata > publisher");
-    return publisherElement ? publisherElement.textContent : null;
+    return publisherElement?.textContent || "";
   };
 
   const getIdentifier = () => {
     const identifierElement = xmlDoc.querySelector("metadata > identifier");
-    return identifierElement ? identifierElement.textContent : null;
+    return identifierElement?.textContent || "";
   };
 
   const getDate = () => {
     const dateElement = xmlDoc.querySelector("metadata > date");
-    return dateElement ? dateElement.textContent : null;
+    return dateElement?.textContent || "";
   };
 
-  const getCoverPath = () => {
-    const coverMeta = xmlDoc.querySelector("metadata > meta[name='cover']");
-    const coverId = coverMeta ? coverMeta.getAttribute("content") : null;
+  const getCoverPath = (): string => {
+    const coverMeta: Element | null = xmlDoc.querySelector("metadata > meta[name='cover']");
+    const coverId: string = coverMeta ? coverMeta.getAttribute("content") || "" : "";
     if (coverId) {
-      const coverItem = xmlDoc.querySelector(
-        `manifest > item[id='${coverId}']`
-      );
-      return coverItem ? coverItem.getAttribute("href") : null;
+      const coverItem: Element | null = xmlDoc.querySelector(`manifest > item[id='${coverId}']`);
+      return coverItem ? coverItem.getAttribute("href") || "" : "";
     }
 
-    return null;
+    return "";
   };
 
   const getTocPath = () => {
-    return xmlDoc
-      .querySelector("manifest > item[id='ncx']")
-      ?.getAttribute("href") as string;
+    return xmlDoc.querySelector("manifest > item[id='ncx']")?.getAttribute("href") as string;
   };
 
   return [
@@ -141,15 +144,13 @@ const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
 };
 
 const parseToc = (tocContent: string, basePath: string) => {
-  const toc: { text: string | null; path: string; file: string }[] = [];
+  const toc: { text: string; path: string; file: string }[] = [];
   const parser = new DOMParser();
   const tocDoc = parser.parseFromString(tocContent, XML_MIME_TYPE);
-  console.log(tocDoc);
   const navPoints = tocDoc.querySelectorAll("navPoint");
   navPoints.forEach((navPoint) => {
-    const text = navPoint.querySelector("navLabel > text")?.textContent || null;
-    const content =
-      navPoint.querySelector("content")?.getAttribute("src") || null;
+    const text = navPoint.querySelector("navLabel > text")?.textContent || "";
+    const content = navPoint.querySelector("content")?.getAttribute("src") || "";
     const contentPath = content ? `${basePath}${content}` : "";
     const parts = contentPath.split("/");
     const file = parts.pop() || "";
