@@ -15,11 +15,12 @@ interface FileInfo {
 
 interface BookBasicInfo {
   title: string;
-  creator: string | null;
-  publisher: string | null;
-  identifier: string | null;
-  date: string | null;
-  coverPath: string | null;
+  creator: string;
+  publisher: string;
+  identifier: string;
+  date: string;
+  coverBlob: Blob | null;
+  coverPath: string;
   toc: { text: string; path: string; file: string }[];
 }
 
@@ -101,7 +102,7 @@ function App() {
       </div>
 
       <div style={{ height: "100%" }}>
-        {fileState.bookBasicInfo?.toc ? (
+        {fileState.bookBasicInfo ? (
           <EpubReader blob={fileState.fileInfo.blob} bookBasicInfo={fileState.bookBasicInfo} />
         ) : null}
       </div>

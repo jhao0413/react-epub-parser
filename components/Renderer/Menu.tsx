@@ -5,13 +5,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MenuIcon } from "@/components/ui/menuIcon";
 
 interface BookBasicInfo {
-  title: string | null;
-  creator: string | null;
-  publisher: string | null;
-  identifier: string | null;
-  date: string | null;
-  coverPath: string | null;
-  coverBlob: Blob;
+  title: string;
+  creator: string;
+  publisher: string;
+  identifier: string;
+  date: string;
+  coverPath: string;
+  coverBlob: Blob | null;
   toc: { text: string; path: string; file: string }[];
 }
 

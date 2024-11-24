@@ -8,13 +8,13 @@ import { resolvePath } from "@/lib/utils";
 import Menu from "@/components/Renderer/Menu";
 
 interface BookBasicInfo {
-  title: string | null;
-  creator: string | null;
-  publisher: string | null;
-  identifier: string | null;
-  date: string | null;
-  coverBlob: Blob;
-  coverPath: string | null;
+  title: string;
+  creator: string;
+  publisher: string;
+  identifier: string;
+  date: string;
+  coverBlob: Blob | null;
+  coverPath: string;
   toc: { text: string; path: string; file: string }[];
 }
 
