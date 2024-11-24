@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MenuIcon } from "@/components/ui/menuIcon";
+import { MenuIcon } from "@/components/ui/menu";
 
 interface BookBasicInfo {
   title: string;
