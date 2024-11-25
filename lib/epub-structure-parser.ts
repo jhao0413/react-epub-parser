@@ -25,7 +25,17 @@ const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
         // Read container.xml to get the path of content.opf
         const containerContent = await zip.file("META-INF/container.xml")?.async("string");
         const fullPath = parseContentOpfPath(containerContent as string);
-        const basePath = fullPath?.split("content.opf")[0];
+
+        if (!fullPath) {
+          throw new Error("Failed to find content.opf path in container.xml.");
+        }
+
+        let basePath = "";
+        if (fullPath?.includes("content")) {
+          basePath = fullPath.split("content.opf")[0];
+        } else {
+          basePath = fullPath.split("/")[0] + "/";
+        }
 
         if (!containerContent) {
           throw new Error("Missing container.xml in EPUB structure.");
@@ -39,6 +49,7 @@ const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
         const content = await zip.file(fullPath)?.async("string");
         const [bookBasicInfo, tocPath] = epubBasicInfoParser(content as string);
 
+        console.log(`${basePath}--------${bookBasicInfo.coverPath}`);
         // Read cover image and toc
         const coverFile = zip.file(`${basePath}${bookBasicInfo.coverPath}`);
 
@@ -150,7 +161,7 @@ const parseToc = (tocContent: string, basePath: string) => {
   const navPoints = tocDoc.querySelectorAll("navPoint");
   navPoints.forEach((navPoint) => {
     const text = navPoint.querySelector("navLabel > text")?.textContent || "";
-    const content = navPoint.querySelector("content")?.getAttribute("src") || "";
+    const [content] = navPoint.querySelector("content")?.getAttribute("src")?.split("#") || "";
     const contentPath = content ? `${basePath}${content}` : "";
     const parts = contentPath.split("/");
     const file = parts.pop() || "";

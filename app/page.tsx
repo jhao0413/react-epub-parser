@@ -42,8 +42,12 @@ const books = {
   ],
   en: [
     {
-      url: "https://jhao413.oss-cn-beijing.aliyuncs.com/Ask%20Iwata%20(Satoru%20Iwata%2C%20Blanca%20Mira)%20(Z-Library).epub",
-      name: "Ask Iwata.epub",
+      url: "https://jhao413.oss-cn-beijing.aliyuncs.com/The%20Little%20Prince%20(Antoine%20de%20Saint-Exup%C3%A9ry)%20(Z-Library).epub",
+      name: "The Little Prince.epub",
+    },
+    {
+      url: "https://jhao413.oss-cn-beijing.aliyuncs.com/All%20The%20Light%20We%20Cannot%20See%20(Anthony%20Doerr)%20(Z-Library).epub",
+      name: "All The Light We Cannot See.epub",
     },
   ],
 };
@@ -88,6 +92,7 @@ function App() {
         },
         bookBasicInfo: { ...bookParserInfo },
       });
+      console.log(bookParserInfo);
     }
   };
 
