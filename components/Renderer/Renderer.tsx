@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { resolvePath } from "@/lib/utils";
 import Menu from "@/components/Renderer/Menu";
+import { useTranslations } from "next-intl";
 
 interface BookBasicInfo {
   title: string;
@@ -26,6 +27,7 @@ interface EpubReaderProps {
 const COLUMN_GAP = 20;
 
 const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
+  const t = useTranslations("Renderer");
   const [currentChapter, setCurrentChapter] = useState(0);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const goToLastPageRef = useRef(false);
@@ -283,10 +285,10 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
       >
         <Button variant="outline" onClick={handlePrevPage}>
           <ChevronLeft />
-          Previous
+          {t("previous")}
         </Button>
         <Button variant="outline" onClick={handleNextPage}>
-          Next
+          {t("next")}
           <ChevronRight />
         </Button>
       </div>

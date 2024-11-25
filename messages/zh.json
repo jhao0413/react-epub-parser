@@ -1,0 +1,12 @@
+{
+    "HomePage": {
+        "title": "EPUB Reader Parser",
+        "introduction": "这是一款简单易用的开源 EPUB 阅读器和解析器，您可以上传 EPUB 文件并在浏览器中直接阅读其内容。",
+        "example": "示例 EPUB 文件下载",
+        "selectEpub": "选择 EPUB 文件"
+    },
+    "Renderer": {
+        "previous": "上一页",
+        "next": "下一页"
+    }
+}

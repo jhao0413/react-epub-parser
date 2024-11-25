@@ -1,0 +1,12 @@
+{
+    "HomePage": {
+        "title": "EPUB Reader Parser",
+        "introduction": "This is a simple, open-source EPUB reader and parser that enables you to upload an EPUB file and read its content directly in your browser.",
+        "example": "Example EPUB files download",
+        "selectEpub": "Select Epub"
+    },
+    "Renderer": {
+        "previous": "Previous",
+        "next": "Next"
+    }
+}
