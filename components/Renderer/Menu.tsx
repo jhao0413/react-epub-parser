@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MenuIcon } from "@/components/ui/menu";
+import { Tooltip } from "@nextui-org/tooltip";
 
 interface BookBasicInfo {
   title: string;
@@ -59,7 +59,7 @@ const Menu: React.FC<MenuProps> = ({ bookBasicInfo, currentChapter, setCurrentCh
         onClick={handleOverlayClick}
       ></div>
       <div
-        className={`w-[22vw] h-[86vh] bg-white rounded-lg fixed top-[7vh] right-[10%] z-10 rounded-[28px] transition-transform transition-opacity duration-500 transform ${
+        className={`w-[22vw] h-[86vh] bg-white rounded-2xl fixed top-[7vh] right-[10%] z-10 transition-transform transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } shadow-md`}
       >
@@ -75,16 +75,9 @@ const Menu: React.FC<MenuProps> = ({ bookBasicInfo, currentChapter, setCurrentCh
             />
           )}
           <div className="w-4/6 mx-4">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <h2 className="font-bold truncate w-5/6 text-lg">{bookBasicInfo.title}</h2>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{bookBasicInfo.title}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip content={bookBasicInfo.title}>
+              <h2 className="font-bold truncate w-[90%] text-lg">{bookBasicInfo.title}</h2>
+            </Tooltip>
 
             <p className="text-slate-500">{bookBasicInfo.creator}</p>
           </div>

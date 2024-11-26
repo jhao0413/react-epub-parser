@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { resolvePath } from "@/lib/utils";
 import Menu from "@/components/Renderer/Menu";
 import { useTranslations } from "next-intl";
+import FontSize from "@/components/Renderer/Toolbar/FontSize";
+import { Button } from "@nextui-org/button";
 
 interface BookBasicInfo {
   title: string;
@@ -24,7 +25,7 @@ interface EpubReaderProps {
   bookBasicInfo: BookBasicInfo;
 }
 
-const COLUMN_GAP = 20;
+const COLUMN_GAP = 100;
 
 const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
   const t = useTranslations("Renderer");
@@ -138,7 +139,9 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
           column-fill: auto;
           word-wrap: break-word;
           overflow: hidden;
-          column-gap: 20px;
+          column-gap: ${COLUMN_GAP}px;
+          font-size: 18px !important;
+          line-height: 1.5;
         }
   
         a {
@@ -273,6 +276,39 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
     }
   };
 
+  const fontSizeChange = (newFontSize: number) => {
+    const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+    if (!renderer || !renderer.contentWindow) {
+      throw new Error("Renderer not found");
+    }
+    const iframeDoc =
+      renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+    const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
+    const style = iframeDoc.querySelector("style");
+    if (style) {
+      style.innerHTML = `
+        body {
+          columns: 2;
+          column-fill: auto;
+          word-wrap: break-word;
+          overflow: hidden;
+          column-gap: ${COLUMN_GAP}px;
+          font-size: ${newFontSize}px !important;
+          line-height: 1.5;
+        }
+  
+        a {
+          text-decoration: none;
+        }
+  
+        img {
+          max-width: ${imgMaxWidth}px;
+          height: auto;
+        }
+      `;
+    }
+  };
+
   return (
     <div style={{ height: "100%", position: "relative" }}>
       <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
@@ -283,13 +319,23 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
           justifyContent: "space-between",
         }}
       >
-        <Button variant="outline" onClick={handlePrevPage}>
-          <ChevronLeft />
+        <Button
+          radius="full"
+          variant="bordered"
+          className="bg-white border-2 border-inherit"
+          onClick={handlePrevPage}
+        >
+          <ChevronLeft size={16} />
           {t("previous")}
         </Button>
-        <Button variant="outline" onClick={handleNextPage}>
+        <Button
+          radius="full"
+          variant="bordered"
+          className="bg-white border-2 border-inherit"
+          onClick={handleNextPage}
+        >
           {t("next")}
-          <ChevronRight />
+          <ChevronRight size={16} />
         </Button>
       </div>
       <div style={{ position: "absolute", right: "-120px", bottom: "0px" }}>
@@ -298,6 +344,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
           currentChapter={currentChapter}
           setCurrentChapter={setCurrentChapter}
         />
+        <FontSize onFontSizeChange={fontSizeChange} />
       </div>
     </div>
   );

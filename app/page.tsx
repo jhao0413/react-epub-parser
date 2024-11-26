@@ -3,14 +3,13 @@
 import { useRef, useState } from "react";
 import EpubReader from "@/components/Renderer/Renderer";
 import epubStructureParser from "@/lib/epub-structure-parser";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { DownloadIcon } from "@/components/ui/download";
-import "./page.css";
 import { Github } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { Button } from "@nextui-org/button";
 import LocaleSwitcher from "@/components/localeSwitcher";
+import { Input } from "@nextui-org/input";
 
 interface FileInfo {
   name: string;
@@ -123,73 +122,78 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <div className="uploadEpub">
-        <Input
-          id="picture"
-          type="file"
-          accept=".epub"
-          ref={inputRef}
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
-        <div className="flex w-full justify-between">
-          <div>
-            <Button type="button" onClick={handleButtonClick}>
-              {t("selectEpub")}
-            </Button>
-            <span style={{ marginLeft: "10px" }}>
-              {fileState.fileInfo.name}{" "}
-              {fileState.fileInfo.name ? `${fileState.fileInfo.size}MB` : null}
-            </span>
-          </div>
+    <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
+      <div className="w-4/5 h-[96vh]">
+        <div className="w-full">
+          <Input
+            id="picture"
+            type="file"
+            accept=".epub"
+            ref={inputRef}
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <div className="flex w-full justify-between">
+            <div>
+              <Button className="bg-black text-white" radius="sm" onClick={handleButtonClick}>
+                {t("selectEpub")}
+              </Button>
+              <span style={{ marginLeft: "10px" }}>
+                {fileState.fileInfo.name}{" "}
+                {fileState.fileInfo.name ? `${fileState.fileInfo.size}MB` : null}
+              </span>
+            </div>
 
-          <div className="flex items-center">
-            <LocaleSwitcher localeValue={locale} />
-            <Button
-              className="ml-2"
-              variant="outline"
-              size="icon"
-              onClick={() => window.open("https://github.com/jhao0413/react-epub-parser", "_blank")}
-            >
-              <Github />
-            </Button>
+            <div className="flex items-center">
+              <LocaleSwitcher localeValue={locale} />
+              <Button
+                className="ml-4 bg-white"
+                isIconOnly
+                variant="shadow"
+                radius="sm"
+                onClick={() =>
+                  window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
+                }
+              >
+                <Github size={16} />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div style={{ height: "100%" }}>
-        {fileState.bookBasicInfo ? (
-          <EpubReader blob={fileState.fileInfo.blob} bookBasicInfo={fileState.bookBasicInfo} />
-        ) : (
-          <>
-            <div>
-              <div className="flex items-center mb-2">
-                <Image
-                  src="https://jhao413.oss-cn-beijing.aliyuncs.com/epub-parser-logo.png"
-                  width={60}
-                  height={60}
-                  alt=""
-                />
-                <h1 className="text-3xl font-bold ml-2">{t("title")}</h1>
+        <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl">
+          {fileState.bookBasicInfo ? (
+            <EpubReader blob={fileState.fileInfo.blob} bookBasicInfo={fileState.bookBasicInfo} />
+          ) : (
+            <>
+              <div>
+                <div className="flex items-center mb-2">
+                  <Image
+                    src="https://jhao413.oss-cn-beijing.aliyuncs.com/epub-parser-logo.png"
+                    width={60}
+                    height={60}
+                    alt=""
+                  />
+                  <h1 className="text-3xl font-bold ml-2">{t("title")}</h1>
+                </div>
+                <p>{t("introduction")}</p>
+                <p className="font-bold text-xl mt-4">{t("example")}</p>
+                <div className="flex mt-2">
+                  {books[locale]?.map((book, index) => (
+                    <Button
+                      className="mr-2"
+                      key={index}
+                      onClick={() => handleDownload(book.url, book.name)}
+                    >
+                      <DownloadIcon />
+                      {book.name}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <p>{t("introduction")}</p>
-              <p className="font-bold text-xl mt-4">{t("example")}</p>
-              <div className="flex mt-2">
-                {books[locale]?.map((book, index) => (
-                  <Button
-                    className="mr-2"
-                    key={index}
-                    onClick={() => handleDownload(book.url, book.name)}
-                  >
-                    <DownloadIcon />
-                    {book.name}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

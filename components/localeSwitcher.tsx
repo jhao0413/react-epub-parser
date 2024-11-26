@@ -1,16 +1,9 @@
 "use client";
 import { Languages } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Dropdown, DropdownTrigger, DropdownItem, Button, DropdownMenu } from "@nextui-org/react";
 import { useTransition } from "react";
 import { setUserLocale } from "@/hooks/use-locale";
 import { Locale } from "@/i18n/config";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   localeValue: string;
@@ -27,18 +20,22 @@ export default function LocaleSwitcher({ localeValue }: Props) {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Languages className="cursor-pointer" />
+    <Dropdown>
+      <DropdownTrigger>
+        <Button className=" bg-white" isIconOnly variant="shadow" radius="sm">
+          <Languages className="cursor-pointer" size={16} />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-10">
-        <DropdownMenuRadioGroup value={localeValue} onValueChange={onChange}>
-          <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="zh">简体中文</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownTrigger>
+      <DropdownMenu
+        disallowEmptySelection
+        variant="light"
+        selectionMode="single"
+        selectedKeys={[localeValue]}
+        onAction={(key) => onChange(String(key))}
+      >
+        <DropdownItem key="en">English</DropdownItem>
+        <DropdownItem key="zh">简体中文</DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
   );
 }
