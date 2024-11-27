@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { resolvePath } from "@/lib/utils";
-import Menu from "@/components/Renderer/Menu";
+import Menu from "@/components/Renderer/Toolbar/Menu";
 import { useTranslations } from "next-intl";
 import { Button } from "@nextui-org/button";
 import FontConfig from "@/components/Renderer/Toolbar/FontConfig";
@@ -287,7 +287,6 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
         ? ""
         : `@font-face {
           font-family: '${fontFamily}';
-          font-weight: 700;
           font-style: normal;
           src: url(${fontUrl}) format('${fontFormat}');
         }`;

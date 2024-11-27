@@ -93,50 +93,73 @@
 @layer base {
   @font-face {
     font-family: 'SiYuanSongTi';
-    font-weight: 500;
     font-style: normal;
-    src: url(/fonts/SourceHanSerifCN-Medium-6.otf) format('opentype');
+    src: url(/fonts/Chinese/SourceHanSerifCN-Medium-6.otf) format('opentype');
   }
 
   @font-face {
     font-family: 'FangZhengKaiTi';
-    font-weight: 500;
     font-style: normal;
-    src: url(/fonts/FangZhengKaiTiJianTi-1.ttf) format('truetype');
+    src: url(/fonts/Chinese/FangZhengKaiTiJianTi-1.ttf) format('truetype');
   }
 
   @font-face {
     font-family: 'SiYuanHeiTi';
-    font-weight: 500;
     font-style: normal;
-    src: url(/fonts/SourceHanSansSC-Normal-2.otf) format('opentype');
+    src: url(/fonts/Chinese/SourceHanSansSC-Normal-2.otf) format('opentype');
   }
 
   @font-face {
-    font-family: 'YanSui';
-    font-weight: 500;
+    font-family: 'XiaLuZhenKai';
     font-style: normal;
-    src: url(/fonts/Iansui0.91-Regular-2.ttf) format('truetype');
+    src: url(/fonts/Chinese/XiaLuZhenKai.ttf) format('truetype');
   }
 
   @font-face {
     font-family: 'HanZiPinYin';
-    font-weight: 500;
     font-style: normal;
-    src: url(/fonts/HanZiPinYin.ttf) format('truetype');
+    src: url(/fonts/Chinese/HanZiPinYin.ttf) format('truetype');
   }
 
   @font-face {
-    font-family: 'XinYeNian';
-    font-weight: 500;
+    font-family: 'JiangChengYuanTi';
     font-style: normal;
-    src: url(/fonts/XinYeNian.otf) format('opentype');
+    src: url(/fonts/Chinese/JiangChengYuanTi.ttf) format('truetype');
   }
 
   @font-face {
-    font-family: 'PinRuShouXie';
-    font-weight: 500;
+    font-family: 'LinHaiLiShu';
     font-style: normal;
-    src: url(/fonts/PinRuShouXie.ttf) format('truetype');
+    src: url(/fonts/Chinese/LinHaiLiShu.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'Comfortaa';
+    font-style: normal;
+    src: url(/fonts/English/Comfortaa-Medium.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'FrederickatheGreat';
+    font-style: normal;
+    src: url(/fonts/English/FrederickatheGreat.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'RobotoSlab';
+    font-style: normal;
+    src: url(/fonts/English/RobotoSlab-Medium.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'Merienda';
+    font-style: normal;
+    src: url(/fonts/English/Merienda-Regular.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'ComicNeueAngular';
+    font-style: normal;
+    src: url(/fonts/English/ComicNeueAngular-Regular.ttf) format('truetype');
   }
 }

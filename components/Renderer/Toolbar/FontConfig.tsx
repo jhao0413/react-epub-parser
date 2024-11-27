@@ -1,7 +1,7 @@
 import { Button } from "@nextui-org/button";
 import { Slider } from "@nextui-org/slider";
 import { ALargeSmall, AArrowDown, AArrowUp } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 interface FontSizeProps {
@@ -18,47 +18,93 @@ interface FontSizeProps {
   }) => void;
 }
 
-const fontFamilies = [
+const zhFontFamilies = [
   { name: "默认字体", value: "sans", url: "", format: "" },
   {
     name: "思源宋体",
     value: "SiYuanSongTi",
-    url: "/fonts/SourceHanSerifCN-Medium-6.otf",
+    url: "/fonts/Chinese/SourceHanSerifCN-Medium-6.otf",
     format: "opentype",
   },
   {
     name: "方正楷体",
     value: "FangZhengKaiTi",
-    url: "/fonts/FangZhengKaiTiJianTi-1.ttf",
+    url: "/fonts/Chinese/FangZhengKaiTiJianTi-1.ttf",
     format: "truetype",
   },
   {
     name: "思源黑体",
     value: "SiYuanHeiTi",
-    url: "/fonts/SourceHanSansSC-Normal-2.otf",
+    url: "/fonts/Chinese/SourceHanSansSC-Normal-2.otf",
     format: "opentype",
   },
-  { name: "芫荽", value: "YanSui", url: "/fonts/Iansui0.91-Regular-2.ttf", format: "truetype" },
+  {
+    name: "霞鹭臻楷",
+    value: "XiaLuZhenKai",
+    url: "/fonts/Chinese/XiaLuZhenKai.ttf",
+    format: "truetype",
+  },
   {
     name: "汉字拼音体",
     value: "HanZiPinYin",
-    url: "/fonts/HanZiPinYin.ttf",
+    url: "/fonts/Chinese/HanZiPinYin.ttf",
     format: "truetype",
   },
-  { name: "新叶念体", value: "XinYeNian", url: "/fonts/XinYeNian.otf", format: "truetype" },
   {
-    name: "品如手写体",
-    value: "PinRuShouXie",
-    url: "/fonts/PinRuShouXie.ttf",
+    name: "江城圆体",
+    value: "JiangChengYuanTi",
+    url: "/fonts/Chinese/JiangChengYuanTi.ttf",
+    format: "truetype",
+  },
+  {
+    name: "临海隶书",
+    value: "LinHaiLiShu",
+    url: "/fonts/Chinese/LinHaiLiShu.ttf",
+    format: "truetype",
+  },
+];
+
+const enFontFamilies = [
+  { name: "Default Font", value: "sans", url: "", format: "" },
+  {
+    name: "Comfortaa",
+    value: "Comfortaa",
+    url: "/fonts/English/Comfortaa-Medium.ttf",
+    format: "truetype",
+  },
+  {
+    name: "FrederickatheGreat",
+    value: "FrederickatheGreat",
+    url: "/fonts/English/FrederickatheGreat.ttf",
+    format: "truetype",
+  },
+  {
+    name: "RobotoSlab",
+    value: "RobotoSlab",
+    url: "/fonts/English/RobotoSlab-Medium.ttf",
+    format: "truetype",
+  },
+  {
+    name: "Merienda",
+    value: "Merienda",
+    url: "/fonts/English/Merienda-Regular.ttf",
+    format: "truetype",
+  },
+  {
+    name: "ComicNeueAngular",
+    value: "ComicNeueAngular",
+    url: "/fonts/English/ComicNeueAngular-Regular.ttf",
     format: "truetype",
   },
 ];
 
 const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
   const t = useTranslations("Renderer");
+  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [fontSize, setFontSize] = useState(18);
   const [fontFamily, setFontFamily] = useState("sans");
+  const cuurentFontFamilies = locale === "zh" ? zhFontFamilies : enFontFamilies;
 
   const handleMenuClick = () => {
     setIsOpen(!isOpen);
@@ -69,7 +115,7 @@ const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
   };
 
   useEffect(() => {
-    const fontInfo = fontFamilies.find((font) => font.value === fontFamily) || {
+    const fontInfo = cuurentFontFamilies.find((font) => font.value === fontFamily) || {
       value: "sans",
       url: "",
       format: "",
@@ -80,7 +126,7 @@ const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
       fontUrl: fontInfo.url,
       fontFormat: fontInfo.format,
     });
-  }, [fontSize, fontFamily]);
+  }, [fontSize, fontFamily, cuurentFontFamilies, onFontChange]);
 
   return (
     <>
@@ -97,7 +143,7 @@ const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
         onClick={handleOverlayClick}
       ></div>
       <div
-        className={`w-[16vw] h-[36vh] p-5 bg-white fixed bottom-[6vh] right-[10%] z-10 rounded-2xl transition-transform transition-opacity duration-500 transform ${
+        className={`w-auto h-auto p-5 bg-white fixed bottom-[6vh] right-[10%] z-10 rounded-2xl transition-transform transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } shadow-md`}
       >
@@ -106,7 +152,7 @@ const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
           step={2}
           label={t("fontSize")}
           showSteps={true}
-          maxValue={24}
+          maxValue={26}
           minValue={16}
           defaultValue={18}
           getValue={(fontSize) => `${fontSize}px`}
@@ -117,12 +163,12 @@ const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
         />
         <p className="mt-2">字体</p>
         <div className="grid gap-2 grid-cols-2">
-          {fontFamilies.map((font) => (
+          {cuurentFontFamilies.map((font) => (
             <Button
               key={font.value}
               variant="bordered"
               color={fontFamily === font.value ? "primary" : "default"}
-              className={`bg-white p-1 rounded-md mt-2 font-${font.value} text-base`}
+              className={`min-w-36 bg-white p-1 rounded-md mt-2 font-${font.value} text-base`}
               style={{ fontFamily: font.value }}
               onClick={() => setFontFamily(font.value)}
             >
