@@ -86,5 +86,57 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'SourceHanSerifCN-Bold', serif;
+  }
+}
+
+@layer base {
+  @font-face {
+    font-family: 'SiYuanSongTi';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/SourceHanSerifCN-Medium-6.otf) format('opentype');
+  }
+
+  @font-face {
+    font-family: 'FangZhengKaiTi';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/FangZhengKaiTiJianTi-1.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'SiYuanHeiTi';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/SourceHanSansSC-Normal-2.otf) format('opentype');
+  }
+
+  @font-face {
+    font-family: 'YanSui';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/Iansui0.91-Regular-2.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'HanZiPinYin';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/HanZiPinYin.ttf) format('truetype');
+  }
+
+  @font-face {
+    font-family: 'XinYeNian';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/XinYeNian.otf) format('opentype');
+  }
+
+  @font-face {
+    font-family: 'PinRuShouXie';
+    font-weight: 500;
+    font-style: normal;
+    src: url(/fonts/PinRuShouXie.ttf) format('truetype');
   }
 }

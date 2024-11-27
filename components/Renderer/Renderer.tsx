@@ -6,8 +6,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { resolvePath } from "@/lib/utils";
 import Menu from "@/components/Renderer/Menu";
 import { useTranslations } from "next-intl";
-import FontSize from "@/components/Renderer/Toolbar/FontSize";
 import { Button } from "@nextui-org/button";
+import FontConfig from "@/components/Renderer/Toolbar/FontConfig";
 
 interface BookBasicInfo {
   title: string;
@@ -34,6 +34,12 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
+  const currentFontConfig = useRef({
+    fontSize: 18,
+    fontFamily: "sans",
+    fontUrl: "",
+    fontFormat: "",
+  });
 
   useEffect(() => {
     if (!blob || !bookBasicInfo.toc) {
@@ -131,29 +137,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
       iframeDoc.write(updatedChapter);
       iframeDoc.close();
 
-      const style = iframeDoc.createElement("style");
-      const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
-      style.innerHTML = `
-        body {
-          columns: 2;
-          column-fill: auto;
-          word-wrap: break-word;
-          overflow: hidden;
-          column-gap: ${COLUMN_GAP}px;
-          font-size: 18px !important;
-          line-height: 1.5;
-        }
-  
-        a {
-          text-decoration: none;
-        }
-  
-        img {
-          max-width: ${imgMaxWidth}px;
-          height: auto;
-        }
-      `;
-      iframeDoc.head.appendChild(style);
+      fontChange(currentFontConfig.current);
       return renderer;
     };
 
@@ -276,7 +260,19 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
     }
   };
 
-  const fontSizeChange = (newFontSize: number) => {
+  const fontChange = ({
+    fontSize,
+    fontFamily,
+    fontUrl,
+    fontFormat,
+  }: {
+    fontSize: number;
+    fontFamily: string;
+    fontUrl: string;
+    fontFormat: string;
+  }) => {
+    currentFontConfig.current = { fontSize, fontFamily, fontUrl, fontFormat };
+
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
     if (!renderer || !renderer.contentWindow) {
       throw new Error("Renderer not found");
@@ -285,16 +281,32 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
       renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
     const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
     const style = iframeDoc.querySelector("style");
-    if (style) {
-      style.innerHTML = `
+
+    const customFont =
+      fontFamily === "sans"
+        ? ""
+        : `@font-face {
+          font-family: '${fontFamily}';
+          font-weight: 700;
+          font-style: normal;
+          src: url(${fontUrl}) format('${fontFormat}');
+        }`;
+
+    const styleContent =
+      customFont +
+      `
         body {
           columns: 2;
           column-fill: auto;
           word-wrap: break-word;
           overflow: hidden;
           column-gap: ${COLUMN_GAP}px;
-          font-size: ${newFontSize}px !important;
+          font-size: ${fontSize}px !important;
           line-height: 1.5;
+        }
+
+        * {
+            font-family: '${fontFamily}' !important;
         }
   
         a {
@@ -306,12 +318,23 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
           height: auto;
         }
       `;
+
+    if (style) {
+      style.innerHTML = styleContent;
+    } else {
+      const newStyle = iframeDoc.createElement("style");
+      newStyle.innerHTML = styleContent;
+      iframeDoc.head.appendChild(newStyle);
     }
   };
 
   return (
     <div style={{ height: "100%", position: "relative" }}>
-      <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
+      <iframe
+        id="epub-renderer"
+        className="font-SourceHanSerifCNBold"
+        style={{ width: "100%", height: "100%" }}
+      ></iframe>
       <div
         style={{
           width: "100%",
@@ -344,7 +367,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
           currentChapter={currentChapter}
           setCurrentChapter={setCurrentChapter}
         />
-        <FontSize onFontSizeChange={fontSizeChange} />
+        <FontConfig onFontChange={fontChange} />
       </div>
     </div>
   );

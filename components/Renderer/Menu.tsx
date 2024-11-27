@@ -76,7 +76,9 @@ const Menu: React.FC<MenuProps> = ({ bookBasicInfo, currentChapter, setCurrentCh
           )}
           <div className="w-4/6 mx-4">
             <Tooltip content={bookBasicInfo.title}>
-              <h2 className="font-bold truncate w-[90%] text-lg">{bookBasicInfo.title}</h2>
+              <h2 className="font-bold truncate w-[90%] text-lg font-SiYuanSongTi">
+                {bookBasicInfo.title}
+              </h2>
             </Tooltip>
 
             <p className="text-slate-500">{bookBasicInfo.creator}</p>

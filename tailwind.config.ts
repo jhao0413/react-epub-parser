@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
 const { nextui } = require("@nextui-org/react");
 
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -61,6 +63,15 @@ const config: Config = {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+      },
+      fontFamily: {
+        SiYuanSongTi: ["SiYuanSongTi", ...defaultTheme.fontFamily.sans],
+        FangZhengKaiTi: ["FangZhengKaiTi", ...defaultTheme.fontFamily.sans],
+        SiYuanHeiTi: ["SiYuanHeiTi", ...defaultTheme.fontFamily.sans],
+        YanSui: ["YanSui", ...defaultTheme.fontFamily.sans],
+        HanZiPinYin: ["HanZiPinYin", ...defaultTheme.fontFamily.sans],
+        XinYeNian: ["XinYeNian", ...defaultTheme.fontFamily.sans],
+        PinRuShouXie: ["PinRuShouXie", ...defaultTheme.fontFamily.sans],
       },
     },
   },
