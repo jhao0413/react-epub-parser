@@ -153,8 +153,8 @@ const FontConfig: React.FC<FontSizeProps> = ({ onFontChange }) => {
           label={t("fontSize")}
           showSteps={true}
           maxValue={26}
-          minValue={16}
-          defaultValue={18}
+          minValue={18}
+          defaultValue={20}
           getValue={(fontSize) => `${fontSize}px`}
           startContent={<AArrowDown className="text-2xl" />}
           endContent={<AArrowUp className="text-2xl" />}
