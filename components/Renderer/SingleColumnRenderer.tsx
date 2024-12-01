@@ -203,7 +203,71 @@ const EpubReader: React.FC = () => {
         iframeDoc.head.appendChild(newStyle);
       }
     };
-  }, [bookInfo, currentChapter, currentFontConfig, theme]);
+  }, [bookInfo, currentChapter]);
+
+  useEffect(() => {
+    const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
+
+    const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+    if (!renderer || !renderer.contentWindow) {
+      throw new Error("Renderer not found");
+    }
+    const iframeDoc =
+      renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+    const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
+    const style = iframeDoc.querySelector("style");
+
+    const customFont =
+      fontFamily === "sans"
+        ? ""
+        : `@font-face {
+            font-family: '${fontFamily}';
+            font-style: normal;
+            src: url(${fontUrl}) format('${fontFormat}');
+          }`;
+
+    const themeStyle =
+      theme === "dark"
+        ? `
+          color: #FFF !important;
+          background-color: #171717 !important;
+        `
+        : "";
+
+    const styleContent =
+      customFont +
+      `
+          body {
+            word-wrap: break-word;
+            font-size: ${fontSize}px !important;
+            line-height: 2;
+            overflow: hidden;
+            min-height: 80vh;
+          }
+  
+          * {
+              font-family: '${fontFamily}' !important;
+              ${themeStyle}
+          }
+    
+          a {
+            text-decoration: none;
+          }
+    
+          img {
+            max-width: ${imgMaxWidth}px;
+            height: auto;
+          }
+        `;
+
+    if (style) {
+      style.innerHTML = styleContent;
+    } else {
+      const newStyle = iframeDoc.createElement("style");
+      newStyle.innerHTML = styleContent;
+      iframeDoc.head.appendChild(newStyle);
+    }
+  }, [currentFontConfig, theme]);
 
   const handleIframeLoad = (renderer: HTMLIFrameElement) => {
     renderer.style.visibility = "hidden";
@@ -288,7 +352,7 @@ const EpubReader: React.FC = () => {
           </Button>
         </div>
 
-        <div className="fixed right-[20%] bottom-12 z-50">
+        <div className="fixed right-[20%] bottom-[40%] z-50">
           <Toolbar />
         </div>
       </div>
