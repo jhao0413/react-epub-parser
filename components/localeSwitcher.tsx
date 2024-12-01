@@ -4,13 +4,13 @@ import { Dropdown, DropdownTrigger, DropdownItem, Button, DropdownMenu } from "@
 import { useTransition } from "react";
 import { setUserLocale } from "@/hooks/use-locale";
 import { Locale } from "@/i18n/config";
+import { useLocale } from "next-intl";
+import { useRendererModeStore } from "@/store/rendererModeStore";
 
-type Props = {
-  localeValue: string;
-};
-
-export default function LocaleSwitcher({ localeValue }: Props) {
+export default function LocaleSwitcher() {
+  const locale = useLocale();
   const [, startTransition] = useTransition();
+  const mode = useRendererModeStore((state) => state.rendererMode);
 
   function onChange(value: string) {
     const locale = value as Locale;
@@ -22,7 +22,12 @@ export default function LocaleSwitcher({ localeValue }: Props) {
   return (
     <Dropdown>
       <DropdownTrigger>
-        <Button className=" bg-white" isIconOnly variant="shadow" radius="sm">
+        <Button
+          className=" bg-white"
+          isIconOnly
+          variant={mode === "single" ? "bordered" : "shadow"}
+          radius="sm"
+        >
           <Languages className="cursor-pointer" size={16} />
         </Button>
       </DropdownTrigger>
@@ -30,7 +35,7 @@ export default function LocaleSwitcher({ localeValue }: Props) {
         disallowEmptySelection
         variant="light"
         selectionMode="single"
-        selectedKeys={[localeValue]}
+        selectedKeys={[locale]}
         onAction={(key) => onChange(String(key))}
       >
         <DropdownItem key="en">English</DropdownItem>

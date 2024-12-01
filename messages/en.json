@@ -8,6 +8,7 @@
     "Renderer": {
         "previous": "Previous",
         "next": "Next",
-        "fontSize": "Font Size"
+        "fontSize": "Font Size",
+        "fontFamily": "Font Family"
     }
 }

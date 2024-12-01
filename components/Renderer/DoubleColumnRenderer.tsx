@@ -2,51 +2,35 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Github } from "lucide-react";
 import { resolvePath } from "@/lib/utils";
-import Menu from "@/components/Renderer/Toolbar/Menu";
 import { useTranslations } from "next-intl";
 import { Button } from "@nextui-org/button";
-import FontConfig from "@/components/Renderer/Toolbar/FontConfig";
-
-interface BookBasicInfo {
-  title: string;
-  creator: string;
-  publisher: string;
-  identifier: string;
-  date: string;
-  coverBlob: Blob | null;
-  coverPath: string;
-  toc: { text: string; path: string; file: string }[];
-}
-
-interface EpubReaderProps {
-  blob: Blob | null;
-  bookBasicInfo: BookBasicInfo;
-}
+import { useBookInfoStore } from "@/store/bookInfoStore";
+import { useCurrentChapterStore } from "@/store/currentChapterStore";
+import { useRendererConfigStore } from "@/store/fontConfigStore";
+import { Toolbar } from "@/components/Renderer/Toolbar/Index";
+import LocaleSwitcher from "@/components/localeSwitcher";
 
 const COLUMN_GAP = 100;
 
-const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
+const EpubReader: React.FC = () => {
   const t = useTranslations("Renderer");
-  const [currentChapter, setCurrentChapter] = useState(0);
+  const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
+  const setCurrentChapter = useCurrentChapterStore((state) => state.setCurrentChapter);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
-  const currentFontConfig = useRef({
-    fontSize: 18,
-    fontFamily: "sans",
-    fontUrl: "",
-    fontFormat: "",
-  });
+  const currentFontConfig = useRendererConfigStore((state) => state.rendererConfig);
+  const bookInfo = useBookInfoStore((state) => state.bookInfo);
 
   useEffect(() => {
-    if (!blob || !bookBasicInfo.toc) {
+    if (!bookInfo.blob || !bookInfo.toc) {
       return;
     }
 
-    JSZip.loadAsync(blob)
+    JSZip.loadAsync(bookInfo.blob)
       .then(async (zip) => {
         const { chapterContent, zip: loadedZip, basePath } = await loadChapterContent(zip);
         const updatedChapter = await parseAndProcessChapter(chapterContent, loadedZip, basePath);
@@ -67,15 +51,15 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
 
     const loadChapterContent = async (zip: JSZip) => {
       const contentOpfPath = `${
-        bookBasicInfo.toc[currentChapter].path ? bookBasicInfo.toc[currentChapter].path + "/" : ""
-      }${decodeURIComponent(bookBasicInfo.toc[currentChapter].file)}`;
+        bookInfo.toc[currentChapter].path ? bookInfo.toc[currentChapter].path + "/" : ""
+      }${decodeURIComponent(bookInfo.toc[currentChapter].file)}`;
       const chapterFile = zip.file(contentOpfPath);
       if (chapterFile) {
         const chapterContent = await chapterFile.async("string");
         return {
           chapterContent,
           zip,
-          basePath: bookBasicInfo.toc[currentChapter].path,
+          basePath: bookInfo.toc[currentChapter].path,
         };
       } else {
         throw new Error("Content file not found");
@@ -137,7 +121,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
       iframeDoc.write(updatedChapter);
       iframeDoc.close();
 
-      fontChange(currentFontConfig.current);
+      fontChange();
       return renderer;
     };
 
@@ -214,7 +198,65 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
 
       renderer.addEventListener("load", handleLoad);
     };
-  }, [blob, bookBasicInfo.toc, currentChapter]);
+
+    const fontChange = () => {
+      const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
+      console.log("Font change:", currentFontConfig);
+
+      const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+      if (!renderer || !renderer.contentWindow) {
+        throw new Error("Renderer not found");
+      }
+      const iframeDoc =
+        renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+      const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
+      const style = iframeDoc.querySelector("style");
+
+      const customFont =
+        fontFamily === "sans"
+          ? ""
+          : `@font-face {
+            font-family: '${fontFamily}';
+            font-style: normal;
+            src: url(${fontUrl}) format('${fontFormat}');
+          }`;
+
+      const styleContent =
+        customFont +
+        `
+          body {
+            columns: 2;
+            column-fill: auto;
+            word-wrap: break-word;
+            overflow: hidden;
+            column-gap: ${COLUMN_GAP}px;
+            font-size: ${fontSize}px !important;
+            line-height: 1.5;
+          }
+  
+          * {
+              font-family: '${fontFamily}' !important;
+          }
+    
+          a {
+            text-decoration: none;
+          }
+    
+          img {
+            max-width: ${imgMaxWidth}px;
+            height: auto;
+          }
+        `;
+
+      if (style) {
+        style.innerHTML = styleContent;
+      } else {
+        const newStyle = iframeDoc.createElement("style");
+        newStyle.innerHTML = styleContent;
+        iframeDoc.head.appendChild(newStyle);
+      }
+    };
+  }, [bookInfo, currentChapter, currentFontConfig]);
 
   const getRendererWindow = () => {
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
@@ -235,7 +277,7 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
         left: currentPageIndex * pageWidthRef.current,
       });
       setCurrentPageIndex(currentPageIndex + 1);
-    } else if (currentChapter < bookBasicInfo.toc.length - 1) {
+    } else if (currentChapter < bookInfo.toc.length - 1) {
       setCurrentPageIndex(1);
       setCurrentChapter(currentChapter + 1);
     }
@@ -260,113 +302,62 @@ const EpubReader: React.FC<EpubReaderProps> = ({ blob, bookBasicInfo }) => {
     }
   };
 
-  const fontChange = ({
-    fontSize,
-    fontFamily,
-    fontUrl,
-    fontFormat,
-  }: {
-    fontSize: number;
-    fontFamily: string;
-    fontUrl: string;
-    fontFormat: string;
-  }) => {
-    currentFontConfig.current = { fontSize, fontFamily, fontUrl, fontFormat };
-
-    const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
-    if (!renderer || !renderer.contentWindow) {
-      throw new Error("Renderer not found");
-    }
-    const iframeDoc =
-      renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-    const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
-    const style = iframeDoc.querySelector("style");
-
-    const customFont =
-      fontFamily === "sans"
-        ? ""
-        : `@font-face {
-          font-family: '${fontFamily}';
-          font-style: normal;
-          src: url(${fontUrl}) format('${fontFormat}');
-        }`;
-
-    const styleContent =
-      customFont +
-      `
-        body {
-          columns: 2;
-          column-fill: auto;
-          word-wrap: break-word;
-          overflow: hidden;
-          column-gap: ${COLUMN_GAP}px;
-          font-size: ${fontSize}px !important;
-          line-height: 1.5;
-        }
-
-        * {
-            font-family: '${fontFamily}' !important;
-        }
-  
-        a {
-          text-decoration: none;
-        }
-  
-        img {
-          max-width: ${imgMaxWidth}px;
-          height: auto;
-        }
-      `;
-
-    if (style) {
-      style.innerHTML = styleContent;
-    } else {
-      const newStyle = iframeDoc.createElement("style");
-      newStyle.innerHTML = styleContent;
-      iframeDoc.head.appendChild(newStyle);
-    }
-  };
-
   return (
-    <div style={{ height: "100%", position: "relative" }}>
-      <iframe
-        id="epub-renderer"
-        className="font-SourceHanSerifCNBold"
-        style={{ width: "100%", height: "100%" }}
-      ></iframe>
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
-      >
-        <Button
-          radius="full"
-          variant="bordered"
-          className="bg-white border-2 border-inherit"
-          onClick={handlePrevPage}
-        >
-          <ChevronLeft size={16} />
-          {t("previous")}
-        </Button>
-        <Button
-          radius="full"
-          variant="bordered"
-          className="bg-white border-2 border-inherit"
-          onClick={handleNextPage}
-        >
-          {t("next")}
-          <ChevronRight size={16} />
-        </Button>
-      </div>
-      <div style={{ position: "absolute", right: "-120px", bottom: "0px" }}>
-        <Menu
-          bookBasicInfo={bookBasicInfo}
-          currentChapter={currentChapter}
-          setCurrentChapter={setCurrentChapter}
-        />
-        <FontConfig onFontChange={fontChange} />
+    <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
+      <div className="w-4/5 h-[96vh]">
+        <div className="w-full">
+          <div className="flex w-full justify-between items-center">
+            <div>
+              <p>{bookInfo.title}</p>
+            </div>
+            <div>
+              <LocaleSwitcher />
+              <Button
+                className="ml-4 bg-white"
+                isIconOnly
+                variant="shadow"
+                radius="sm"
+                onClick={() =>
+                  window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
+                }
+              >
+                <Github size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl">
+          <div style={{ height: "100%", position: "relative" }}>
+            <iframe
+              id="epub-renderer"
+              className="font-SourceHanSerifCNBold"
+              style={{ width: "100%", height: "100%" }}
+            ></iframe>
+            <div className="w-full flex justify-between">
+              <Button
+                radius="full"
+                variant="bordered"
+                className="bg-white border-2 border-inherit"
+                onClick={handlePrevPage}
+              >
+                <ChevronLeft size={16} />
+                {t("previous")}
+              </Button>
+              <Button
+                radius="full"
+                variant="bordered"
+                className="bg-white border-2 border-inherit"
+                onClick={handleNextPage}
+              >
+                {t("next")}
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+            <div style={{ position: "absolute", right: "-120px", bottom: "0px" }}>
+              <Toolbar />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

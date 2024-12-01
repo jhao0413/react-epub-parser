@@ -49,7 +49,6 @@ const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
         const content = await zip.file(fullPath)?.async("string");
         const [bookBasicInfo, tocPath] = epubBasicInfoParser(content as string);
 
-        console.log(`${basePath}--------${bookBasicInfo.coverPath}`);
         // Read cover image and toc
         const coverFile = zip.file(`${basePath}${bookBasicInfo.coverPath}`);
 

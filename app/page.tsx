@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import EpubReader from "@/components/Renderer/Renderer";
+import { useEffect, useRef, useState } from "react";
+import DoubleColumnRenderer from "@/components/Renderer/DoubleColumnRenderer";
 import epubStructureParser from "@/lib/epub-structure-parser";
 import Image from "next/image";
 import { DownloadIcon } from "@/components/ui/download";
@@ -10,6 +10,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@nextui-org/button";
 import LocaleSwitcher from "@/components/localeSwitcher";
 import { Input } from "@nextui-org/input";
+import SingleColumnRenderer from "@/components/Renderer/SingleColumnRenderer";
+import { useRendererModeStore } from "@/store/rendererModeStore";
+import { useBookInfoStore } from "@/store/bookInfoStore";
 
 interface FileInfo {
   name: string;
@@ -54,6 +57,8 @@ const books = {
 function App() {
   const locale = useLocale() as keyof typeof books;
   const t = useTranslations("HomePage");
+  const rendererMode = useRendererModeStore((state) => state.rendererMode);
+  const setBookInfo = useBookInfoStore((state) => state.setBookInfo);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileState, setFileState] = useState<{
@@ -63,6 +68,10 @@ function App() {
     fileInfo: { name: "", size: 0, blob: null },
     bookBasicInfo: null,
   });
+
+  useEffect(() => {
+    console.log("Renderer mode changed:", rendererMode);
+  }, [rendererMode]);
 
   const handleButtonClick = () => {
     if (inputRef.current) {
@@ -91,7 +100,7 @@ function App() {
         },
         bookBasicInfo: { ...bookParserInfo },
       });
-      console.log(bookParserInfo);
+      setBookInfo({ blob: fileBlob as Blob, ...bookParserInfo });
     }
   };
 
@@ -122,51 +131,54 @@ function App() {
   };
 
   return (
-    <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
-      <div className="w-4/5 h-[96vh]">
-        <div className="w-full">
-          <Input
-            id="picture"
-            type="file"
-            accept=".epub"
-            ref={inputRef}
-            className="hidden"
-            onChange={handleFileChange}
-          />
-          <div className="flex w-full justify-between">
-            <div>
-              <Button className="bg-black text-white" radius="sm" onClick={handleButtonClick}>
-                {t("selectEpub")}
-              </Button>
-              <span style={{ marginLeft: "10px" }}>
-                {fileState.fileInfo.name}{" "}
-                {fileState.fileInfo.name ? `${fileState.fileInfo.size}MB` : null}
-              </span>
-            </div>
+    <>
+      {fileState.bookBasicInfo ? (
+        rendererMode === "single" ? (
+          <SingleColumnRenderer />
+        ) : (
+          <DoubleColumnRenderer />
+        )
+      ) : (
+        <>
+          <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
+            <div className="w-4/5 h-[96vh]">
+              <div className="w-full">
+                <Input
+                  id="picture"
+                  type="file"
+                  accept=".epub"
+                  ref={inputRef}
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <div className="flex w-full justify-between">
+                  <div>
+                    <Button className="bg-black text-white" radius="sm" onClick={handleButtonClick}>
+                      {t("selectEpub")}
+                    </Button>
+                    <span style={{ marginLeft: "10px" }}>
+                      {fileState.fileInfo.name}{" "}
+                      {fileState.fileInfo.name ? `${fileState.fileInfo.size}MB` : null}
+                    </span>
+                  </div>
 
-            <div className="flex items-center">
-              <LocaleSwitcher localeValue={locale} />
-              <Button
-                className="ml-4 bg-white"
-                isIconOnly
-                variant="shadow"
-                radius="sm"
-                onClick={() =>
-                  window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
-                }
-              >
-                <Github size={16} />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl">
-          {fileState.bookBasicInfo ? (
-            <EpubReader blob={fileState.fileInfo.blob} bookBasicInfo={fileState.bookBasicInfo} />
-          ) : (
-            <>
-              <div>
+                  <div className="flex items-center">
+                    <LocaleSwitcher />
+                    <Button
+                      className="ml-4 bg-white"
+                      isIconOnly
+                      variant="shadow"
+                      radius="sm"
+                      onClick={() =>
+                        window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
+                      }
+                    >
+                      <Github size={16} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl">
                 <div className="flex items-center mb-2">
                   <Image
                     src="https://jhao413.oss-cn-beijing.aliyuncs.com/epub-parser-logo.png"
@@ -191,11 +203,11 @@ function App() {
                   ))}
                 </div>
               </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
