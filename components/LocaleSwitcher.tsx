@@ -14,6 +14,7 @@ export default function LocaleSwitcher() {
 
   function onChange(value: string) {
     const locale = value as Locale;
+
     startTransition(() => {
       setUserLocale(locale);
     });
