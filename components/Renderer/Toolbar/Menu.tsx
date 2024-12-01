@@ -6,6 +6,7 @@ import { Tooltip } from "@nextui-org/tooltip";
 import { useRendererModeStore } from "@/store/rendererModeStore";
 import { useBookInfoStore } from "@/store/bookInfoStore";
 import { useCurrentChapterStore } from "@/store/currentChapterStore";
+import { useTheme } from "next-themes";
 
 const Menu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ const Menu: React.FC = () => {
   const bookInfo = useBookInfoStore((state) => state.bookInfo);
   const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore((state) => state.setCurrentChapter);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (bookInfo.coverBlob) {
@@ -37,7 +39,7 @@ const Menu: React.FC = () => {
   return (
     <>
       <div
-        className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center cursor-pointer z-50"
+        className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center cursor-pointer z-50 dark:bg-neutral-900"
         onClick={handleMenuClick}
       >
         <MenuIcon isOpen={isOpen} />
@@ -49,9 +51,9 @@ const Menu: React.FC = () => {
         onClick={handleOverlayClick}
       ></div>
       <div
-        className={`w-auto h-[86vh] bg-white rounded-2xl fixed bottom-12 ${
+        className={`w-auto h-[86vh] bg-white rounded-2xl dark:bg-neutral-800 fixed bottom-12 ${
           mode === "single" ? "right-1/4" : " right-[10%]"
-        } z-50 transition-transform transition-opacity duration-500 transform ${
+        } z-50 transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } shadow-md`}
       >
@@ -73,18 +75,23 @@ const Menu: React.FC = () => {
               </h2>
             </Tooltip>
 
-            <p className="text-slate-500">{bookInfo.creator}</p>
+            <p className="text-slate-500 dark:text-white">{bookInfo.creator}</p>
           </div>
         </div>
         <div>
           <ScrollArea className="h-[68vh] w-full z-50">
             <div>
               {bookInfo.toc.map((_item, index) => (
-                <div key={index} className="py-4 px-8 hover:bg-blue-50 cursor-pointer	">
+                <div
+                  key={index}
+                  className={`py-4 px-8 ${
+                    theme === "dark" ? "hover:bg-neutral-600" : "hover:bg-blue-50"
+                  }  dark:text-white cursor-pointer	`}
+                >
                   <a
                     onClick={() => setCurrentChapter(index)}
                     className={`block text-sm ${
-                      currentChapter === index ? "text-blue-500" : "text-slate-500"
+                      currentChapter === index ? "text-blue-500" : "text-slate-500 dark:text-white"
                     }`}
                   >
                     {_item.text}

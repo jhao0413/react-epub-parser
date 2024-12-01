@@ -23,7 +23,7 @@ export default function LocaleSwitcher() {
     <Dropdown>
       <DropdownTrigger>
         <Button
-          className=" bg-white"
+          className=" bg-white dark:bg-neutral-900"
           isIconOnly
           variant={mode === "single" ? "bordered" : "shadow"}
           radius="sm"

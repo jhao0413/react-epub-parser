@@ -4,20 +4,20 @@ import React, { useEffect } from "react";
 import JSZip from "jszip";
 import { resolvePath } from "@/lib/utils";
 import { Button } from "@nextui-org/button";
-import FontConfig from "@/components/Renderer/Toolbar/FontConfig";
-import Menu from "@/components/Renderer/Toolbar/Menu";
-import SwitchRendererMode from "@/components/Renderer/Toolbar/SwitchRendererMode";
 import { useBookInfoStore } from "@/store/bookInfoStore";
 import { useCurrentChapterStore } from "@/store/currentChapterStore";
 import { useRendererConfigStore } from "@/store/fontConfigStore";
-import LocaleSwitcher from "@/components/localeSwitcher";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { Github } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Toolbar } from "@/components/Renderer/Toolbar/Index";
 
 const EpubReader: React.FC = () => {
   const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore((state) => state.setCurrentChapter);
   const currentFontConfig = useRendererConfigStore((state) => state.rendererConfig);
   const bookInfo = useBookInfoStore((state) => state.bookInfo);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!bookInfo.blob || !bookInfo.toc) {
@@ -161,6 +161,14 @@ const EpubReader: React.FC = () => {
             src: url(${fontUrl}) format('${fontFormat}');
           }`;
 
+      const themeStyle =
+        theme === "dark"
+          ? `
+          color: #FFF !important;
+          background-color: #171717 !important;
+        `
+          : "";
+
       const styleContent =
         customFont +
         `
@@ -174,6 +182,7 @@ const EpubReader: React.FC = () => {
   
           * {
               font-family: '${fontFamily}' !important;
+              ${themeStyle}
           }
     
           a {
@@ -194,7 +203,7 @@ const EpubReader: React.FC = () => {
         iframeDoc.head.appendChild(newStyle);
       }
     };
-  }, [bookInfo, currentChapter, currentFontConfig]);
+  }, [bookInfo, currentChapter, currentFontConfig, theme]);
 
   const handleIframeLoad = (renderer: HTMLIFrameElement) => {
     renderer.style.visibility = "hidden";
@@ -237,8 +246,8 @@ const EpubReader: React.FC = () => {
 
   return (
     <>
-      <div className="w-full h-screen bg-gray-100 flex justify-center fixed z-0"></div>
-      <div className="w-1/2 h-14 bg-white border-b-2 flex fixed items-center pl-4 z-20 inset-x-0 m-auto">
+      <div className="w-full h-screen bg-gray-100 flex justify-center fixed z-0 dark:bg-neutral-800"></div>
+      <div className="w-1/2 h-14 bg-white border-b-2 flex fixed items-center pl-4 z-20 inset-x-0 m-auto dark:bg-neutral-900">
         <div className="flex w-full justify-between items-center pr-4">
           <div>
             <p>{bookInfo.title}</p>
@@ -246,30 +255,33 @@ const EpubReader: React.FC = () => {
           <div>
             <LocaleSwitcher />
             <Button
-              className="ml-4 bg-white"
+              className="ml-4 bg-white dark:bg-neutral-900"
               isIconOnly
               variant="bordered"
               radius="sm"
               onClick={() => window.open("https://github.com/jhao0413/react-epub-parser", "_blank")}
             >
-              <Github size={16} />
+              <Github size={16} className="dark:bg-neutral-900" />
             </Button>
           </div>
         </div>
       </div>
-      <div className="w-1/2 h-full min-h-[100vh] mx-auto bg-white relative pt-14 flex flex-col">
-        <iframe id="epub-renderer" className="w-full z-10 px-14 overflow-hidden grow"></iframe>
+      <div className="w-1/2 h-full min-h-[100vh] mx-auto bg-white relative pt-14 flex flex-col dark:bg-neutral-900">
+        <iframe
+          id="epub-renderer"
+          className="w-full z-10 px-14 overflow-hidden grow dark:bg-neutral-900"
+        ></iframe>
         <div className="w-full z-10 h-20 flex justify-around items-start">
           <Button
             variant="bordered"
-            className="text-base rounded-md w-40"
+            className="text-base rounded-md w-40 dark:bg-neutral-900"
             onClick={handlePrevChapter}
           >
             上一章
           </Button>
           <Button
             variant="bordered"
-            className="text-base rounded-md w-40"
+            className="text-base rounded-md w-40 dark:bg-neutral-900"
             onClick={handleNextChapter}
           >
             下一章
@@ -277,9 +289,7 @@ const EpubReader: React.FC = () => {
         </div>
 
         <div className="fixed right-[20%] bottom-12 z-50">
-          <Menu />
-          <FontConfig />
-          <SwitchRendererMode />
+          <Toolbar />
         </div>
       </div>
     </>

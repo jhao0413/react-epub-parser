@@ -44,7 +44,7 @@ const FontConfig: React.FC = ({}) => {
   return (
     <>
       <div
-        className="w-12 h-12 mt-4 bg-white rounded-full shadow-md flex items-center justify-center cursor-pointer z-50"
+        className="w-12 h-12 mt-4 bg-white rounded-full shadow-md flex items-center justify-center cursor-pointer z-50 dark:bg-neutral-900"
         onClick={handleMenuClick}
       >
         <ALargeSmall />
@@ -56,15 +56,16 @@ const FontConfig: React.FC = ({}) => {
         onClick={handleOverlayClick}
       ></div>
       <div
-        className={`w-auto h-auto p-5 bg-white fixed bottom-12 ${
+        className={`w-auto h-auto p-5 bg-white dark:bg-neutral-800 fixed bottom-12 ${
           mode === "single" ? "right-1/4" : "right-[10%]"
-        } z-10 rounded-2xl transition-transform transition-opacity duration-500 transform ${
+        } z-10 rounded-2xl transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } shadow-md`}
       >
         <Slider
           size="lg"
           step={2}
+          color="foreground"
           label={t("fontSize")}
           showSteps={true}
           maxValue={26}
@@ -83,7 +84,7 @@ const FontConfig: React.FC = ({}) => {
               key={font.value}
               variant="bordered"
               color={rendererConfig.fontFamily === font.value ? "primary" : "default"}
-              className={`min-w-36 bg-white p-1 rounded-md mt-2 font-${font.value} text-base`}
+              className={`min-w-36 bg-white dark:bg-neutral-700 p-1 rounded-md mt-2 font-${font.value} text-base`}
               style={{ fontFamily: font.value }}
               onClick={() => onFontFamilyChange(font.value)}
             >

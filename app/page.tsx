@@ -8,7 +8,7 @@ import { DownloadIcon } from "@/components/ui/download";
 import { Github } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@nextui-org/button";
-import LocaleSwitcher from "@/components/localeSwitcher";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { Input } from "@nextui-org/input";
 import SingleColumnRenderer from "@/components/Renderer/SingleColumnRenderer";
 import { useRendererModeStore } from "@/store/rendererModeStore";
@@ -140,7 +140,7 @@ function App() {
         )
       ) : (
         <>
-          <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
+          <div className="w-full h-screen bg-gray-100 flex justify-center items-center dark:bg-neutral-800">
             <div className="w-4/5 h-[96vh]">
               <div className="w-full">
                 <Input
@@ -165,7 +165,7 @@ function App() {
                   <div className="flex items-center">
                     <LocaleSwitcher />
                     <Button
-                      className="ml-4 bg-white"
+                      className="ml-4 bg-white dark:bg-neutral-900"
                       isIconOnly
                       variant="shadow"
                       radius="sm"
@@ -178,7 +178,7 @@ function App() {
                   </div>
                 </div>
               </div>
-              <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl">
+              <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
                 <div className="flex items-center mb-2">
                   <Image
                     src="https://jhao413.oss-cn-beijing.aliyuncs.com/epub-parser-logo.png"

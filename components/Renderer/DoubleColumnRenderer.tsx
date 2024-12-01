@@ -10,7 +10,8 @@ import { useBookInfoStore } from "@/store/bookInfoStore";
 import { useCurrentChapterStore } from "@/store/currentChapterStore";
 import { useRendererConfigStore } from "@/store/fontConfigStore";
 import { Toolbar } from "@/components/Renderer/Toolbar/Index";
-import LocaleSwitcher from "@/components/localeSwitcher";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
+import { useTheme } from "next-themes";
 
 const COLUMN_GAP = 100;
 
@@ -24,6 +25,7 @@ const EpubReader: React.FC = () => {
   const pageCountRef = useRef(0);
   const currentFontConfig = useRendererConfigStore((state) => state.rendererConfig);
   const bookInfo = useBookInfoStore((state) => state.bookInfo);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!bookInfo.blob || !bookInfo.toc) {
@@ -201,7 +203,6 @@ const EpubReader: React.FC = () => {
 
     const fontChange = () => {
       const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
-      console.log("Font change:", currentFontConfig);
 
       const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
       if (!renderer || !renderer.contentWindow) {
@@ -221,6 +222,14 @@ const EpubReader: React.FC = () => {
             src: url(${fontUrl}) format('${fontFormat}');
           }`;
 
+      const themeStyle =
+        theme === "dark"
+          ? `
+        color: #FFF !important;
+        background-color: #171717 !important;
+      `
+          : "";
+
       const styleContent =
         customFont +
         `
@@ -236,6 +245,7 @@ const EpubReader: React.FC = () => {
   
           * {
               font-family: '${fontFamily}' !important;
+              ${themeStyle}
           }
     
           a {
@@ -256,7 +266,7 @@ const EpubReader: React.FC = () => {
         iframeDoc.head.appendChild(newStyle);
       }
     };
-  }, [bookInfo, currentChapter, currentFontConfig]);
+  }, [bookInfo, currentChapter, currentFontConfig, theme]);
 
   const getRendererWindow = () => {
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
@@ -303,7 +313,7 @@ const EpubReader: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-gray-100 flex justify-center items-center">
+    <div className="w-full h-screen bg-gray-100 flex justify-center items-center dark:bg-neutral-800">
       <div className="w-4/5 h-[96vh]">
         <div className="w-full">
           <div className="flex w-full justify-between items-center">
@@ -313,7 +323,7 @@ const EpubReader: React.FC = () => {
             <div>
               <LocaleSwitcher />
               <Button
-                className="ml-4 bg-white"
+                className="ml-4 bg-white dark:bg-neutral-900"
                 isIconOnly
                 variant="shadow"
                 radius="sm"
@@ -321,23 +331,19 @@ const EpubReader: React.FC = () => {
                   window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
                 }
               >
-                <Github size={16} />
+                <Github size={16} className="dark:bg-neutral-900" />
               </Button>
             </div>
           </div>
         </div>
-        <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl">
+        <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
           <div style={{ height: "100%", position: "relative" }}>
-            <iframe
-              id="epub-renderer"
-              className="font-SourceHanSerifCNBold"
-              style={{ width: "100%", height: "100%" }}
-            ></iframe>
+            <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
             <div className="w-full flex justify-between">
               <Button
                 radius="full"
                 variant="bordered"
-                className="bg-white border-2 border-inherit"
+                className="bg-white border-2 border-inherit dark:bg-neutral-900"
                 onClick={handlePrevPage}
               >
                 <ChevronLeft size={16} />
@@ -346,14 +352,14 @@ const EpubReader: React.FC = () => {
               <Button
                 radius="full"
                 variant="bordered"
-                className="bg-white border-2 border-inherit"
+                className="bg-white border-2 border-inherit dark:bg-neutral-900"
                 onClick={handleNextPage}
               >
                 {t("next")}
                 <ChevronRight size={16} />
               </Button>
             </div>
-            <div style={{ position: "absolute", right: "-120px", bottom: "0px" }}>
+            <div className="absolute right-[-140px] top-0 bottom-0 flex flex-col justify-center items-center">
               <Toolbar />
             </div>
           </div>
