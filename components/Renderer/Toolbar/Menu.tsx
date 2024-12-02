@@ -51,7 +51,7 @@ const Menu: React.FC = () => {
         onClick={handleOverlayClick}
       ></div>
       <div
-        className={`w-auto h-[86vh] bg-white rounded-2xl dark:bg-neutral-800 fixed bottom-12 ${
+        className={`w-auto h-[86vh] bg-white rounded-2xl dark:bg-neutral-800 fixed top-[calc(7vh+32px)] ${
           mode === "single" ? "right-1/4" : " right-[10%]"
         } z-50 transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"

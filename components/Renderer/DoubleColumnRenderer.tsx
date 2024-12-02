@@ -379,55 +379,49 @@ const EpubReader: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-gray-100 flex justify-center items-center dark:bg-neutral-800">
-      <div className="w-4/5 h-[96vh]">
-        <div className="w-full">
-          <div className="flex w-full justify-between items-center">
-            <div>
-              <p>{bookInfo.title}</p>
-            </div>
-            <div>
-              <LocaleSwitcher />
-              <Button
-                className="ml-4 bg-white dark:bg-neutral-900"
-                isIconOnly
-                variant="shadow"
-                radius="sm"
-                onClick={() =>
-                  window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
-                }
-              >
-                <Github size={16} className="dark:bg-neutral-900" />
-              </Button>
-            </div>
-          </div>
+    <div className="w-full h-screen bg-gray-100 flex justify-center items-center flex-col dark:bg-neutral-800">
+      <div className="flex w-4/5 h-12 justify-between items-center">
+        <div>
+          <p>{bookInfo.title}</p>
         </div>
-        <div className="w-full h-[90%] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
-          <div style={{ height: "100%", position: "relative" }}>
-            <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
-            <div className="w-full flex justify-between">
-              <Button
-                radius="full"
-                variant="bordered"
-                className="bg-white border-2 border-inherit dark:bg-neutral-900"
-                onClick={handlePrevPage}
-              >
-                <ChevronLeft size={16} />
-                {t("previous")}
-              </Button>
-              <Button
-                radius="full"
-                variant="bordered"
-                className="bg-white border-2 border-inherit dark:bg-neutral-900"
-                onClick={handleNextPage}
-              >
-                {t("next")}
-                <ChevronRight size={16} />
-              </Button>
-            </div>
-            <div className="absolute right-[-140px] top-0 bottom-0 flex flex-col justify-center items-center">
-              <Toolbar />
-            </div>
+        <div>
+          <LocaleSwitcher />
+          <Button
+            className="ml-4 bg-white dark:bg-neutral-900"
+            isIconOnly
+            variant="shadow"
+            radius="sm"
+            onClick={() => window.open("https://github.com/jhao0413/react-epub-parser", "_blank")}
+          >
+            <Github size={16} className="dark:bg-neutral-900" />
+          </Button>
+        </div>
+      </div>
+      <div className="w-4/5 h-[86vh] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
+        <div className="h-full relative">
+          <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
+          <div className="w-full flex justify-between">
+            <Button
+              radius="full"
+              variant="bordered"
+              className="bg-white border-2 border-inherit dark:bg-neutral-900"
+              onClick={handlePrevPage}
+            >
+              <ChevronLeft size={16} />
+              {t("previous")}
+            </Button>
+            <Button
+              radius="full"
+              variant="bordered"
+              className="bg-white border-2 border-inherit dark:bg-neutral-900"
+              onClick={handleNextPage}
+            >
+              {t("next")}
+              <ChevronRight size={16} />
+            </Button>
+          </div>
+          <div className="absolute right-[-140px] top-0 bottom-0 flex flex-col justify-center items-center">
+            <Toolbar />
           </div>
         </div>
       </div>
