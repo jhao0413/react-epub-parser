@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import JSZip from "jszip";
 import { ChevronLeft, ChevronRight, Github } from "lucide-react";
-import { resolvePath } from "@/lib/utils";
+import { resolvePath } from "@/utils/utils";
 import { useTranslations } from "next-intl";
 import { Button } from "@nextui-org/button";
 import { useBookInfoStore } from "@/store/bookInfoStore";

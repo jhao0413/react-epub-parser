@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import DoubleColumnRenderer from "@/components/Renderer/DoubleColumnRenderer";
-import epubStructureParser from "@/lib/epub-structure-parser";
+import epubStructureParser from "@/utils/epubStructureParser";
 import Image from "next/image";
 import { DownloadIcon } from "@/components/ui/download";
 import { Github } from "lucide-react";

@@ -2,7 +2,7 @@
 import { Languages } from "lucide-react";
 import { Dropdown, DropdownTrigger, DropdownItem, Button, DropdownMenu } from "@nextui-org/react";
 import { useTransition } from "react";
-import { setUserLocale } from "@/hooks/use-locale";
+import { setUserLocale } from "@/hooks/useLocale";
 import { Locale } from "@/i18n/config";
 import { useLocale } from "next-intl";
 import { useRendererModeStore } from "@/store/rendererModeStore";

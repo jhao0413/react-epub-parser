@@ -1,4 +1,4 @@
-import { getUserLocale } from "@/hooks/use-locale";
+import { getUserLocale } from "@/hooks/useLocale";
 import { getRequestConfig } from "next-intl/server";
 
 export default getRequestConfig(async () => {

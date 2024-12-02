@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import JSZip from "jszip";
-import { resolvePath } from "@/lib/utils";
+import { resolvePath } from "@/utils/utils";
 import { Button } from "@nextui-org/button";
 import { useBookInfoStore } from "@/store/bookInfoStore";
 import { useCurrentChapterStore } from "@/store/currentChapterStore";
@@ -149,7 +149,7 @@ const EpubReader: React.FC = () => {
       }
       const iframeDoc =
         renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-      const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
+      const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 2 : 0;
       const style = iframeDoc.querySelector("style");
 
       const customFont =
@@ -178,6 +178,7 @@ const EpubReader: React.FC = () => {
             line-height: 2;
             overflow: hidden;
             min-height: 80vh;
+            max-height: max-content;
           }
   
           * {
@@ -214,7 +215,7 @@ const EpubReader: React.FC = () => {
     }
     const iframeDoc =
       renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-    const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
+    const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 2 : 0;
     const style = iframeDoc.querySelector("style");
 
     const customFont =
@@ -272,14 +273,13 @@ const EpubReader: React.FC = () => {
   const handleIframeLoad = (renderer: HTMLIFrameElement) => {
     renderer.style.visibility = "hidden";
     const handleLoad = () => {
-      const iframeDoc = renderer.contentDocument || renderer.contentWindow?.document;
+      const iframeDoc = renderer.contentDocument;
 
       if (!iframeDoc || !renderer.contentWindow) {
         throw new Error("Iframe document not found");
       }
 
       renderer.style.height = `0px`;
-
       if (iframeDoc.body) {
         renderer.style.visibility = "visible";
         const body = iframeDoc.body;
@@ -291,8 +291,7 @@ const EpubReader: React.FC = () => {
           html.scrollHeight,
           html.offsetHeight
         );
-        console.log(html.clientHeight, html.scrollHeight, html.offsetHeight);
-        renderer.style.height = `${height}px`;
+        renderer.style.height = `${height + 40}px`;
         renderer.removeEventListener("load", handleLoad);
       }
     };
@@ -331,10 +330,7 @@ const EpubReader: React.FC = () => {
         </div>
       </div>
       <div className="w-1/2 h-full min-h-[100vh] mx-auto bg-white relative pt-14 flex flex-col dark:bg-neutral-900">
-        <iframe
-          id="epub-renderer"
-          className="w-full z-10 px-14 overflow-hidden grow dark:bg-neutral-900"
-        ></iframe>
+        <iframe id="epub-renderer" className="w-full z-10 px-14 grow dark:bg-neutral-900"></iframe>
         <div className="w-full z-10 h-20 flex justify-around items-start">
           <Button
             variant="bordered"
