@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type BookBasicInfoType = {
+export type BookBasicInfoType = {
   title: string;
   creator: string;
   publisher: string;

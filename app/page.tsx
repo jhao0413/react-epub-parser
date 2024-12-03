@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import DoubleColumnRenderer from "@/components/Renderer/DoubleColumnRenderer";
 import epubStructureParser from "@/utils/epubStructureParser";
 import Image from "next/image";
@@ -13,23 +13,8 @@ import { Input } from "@nextui-org/input";
 import SingleColumnRenderer from "@/components/Renderer/SingleColumnRenderer";
 import { useRendererModeStore } from "@/store/rendererModeStore";
 import { useBookInfoStore } from "@/store/bookInfoStore";
-
-interface FileInfo {
-  name: string;
-  size: number;
-  blob: Blob | null;
-}
-
-interface BookBasicInfo {
-  title: string;
-  creator: string;
-  publisher: string;
-  identifier: string;
-  date: string;
-  coverBlob: Blob | null;
-  coverPath: string;
-  toc: { text: string; path: string; file: string }[];
-}
+import { useBookZipStore } from "@/store/bookZipStore";
+import { loadZip } from "@/utils/zipUtils";
 
 const books = {
   zh: [
@@ -58,20 +43,11 @@ function App() {
   const locale = useLocale() as keyof typeof books;
   const t = useTranslations("HomePage");
   const rendererMode = useRendererModeStore((state) => state.rendererMode);
+  const bookInfo = useBookInfoStore((state) => state.bookInfo);
   const setBookInfo = useBookInfoStore((state) => state.setBookInfo);
+  const setBookZip = useBookZipStore((state) => state.setBookZip);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const [fileState, setFileState] = useState<{
-    fileInfo: FileInfo;
-    bookBasicInfo: BookBasicInfo | null;
-  }>({
-    fileInfo: { name: "", size: 0, blob: null },
-    bookBasicInfo: null,
-  });
-
-  useEffect(() => {
-    console.log("Renderer mode changed:", rendererMode);
-  }, [rendererMode]);
 
   const handleButtonClick = () => {
     if (inputRef.current) {
@@ -81,30 +57,19 @@ function App() {
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files) {
-      return;
-    }
+    if (!files?.length) return;
     const file = files[0];
 
     if (file) {
-      const fileSizeInBytes = file.size;
-      const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
-
       const fileBlob = await getFileBinary(file);
+      const jsZip = await loadZip(file);
+      setBookZip(jsZip);
       const bookParserInfo = await epubStructureParser(file);
-      setFileState({
-        fileInfo: {
-          name: file.name,
-          size: parseFloat(fileSizeInMB),
-          blob: fileBlob as Blob,
-        },
-        bookBasicInfo: { ...bookParserInfo },
-      });
       setBookInfo({ blob: fileBlob as Blob, ...bookParserInfo });
     }
   };
 
-  function getFileBinary(file: Blob) {
+  function getFileBinary(file: File) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
@@ -132,7 +97,7 @@ function App() {
 
   return (
     <>
-      {fileState.bookBasicInfo ? (
+      {bookInfo.title ? (
         rendererMode === "single" ? (
           <SingleColumnRenderer />
         ) : (
@@ -156,10 +121,6 @@ function App() {
                     <Button className="bg-black text-white" radius="sm" onClick={handleButtonClick}>
                       {t("selectEpub")}
                     </Button>
-                    <span style={{ marginLeft: "10px" }}>
-                      {fileState.fileInfo.name}{" "}
-                      {fileState.fileInfo.name ? `${fileState.fileInfo.size}MB` : null}
-                    </span>
                   </div>
 
                   <div className="flex items-center">
