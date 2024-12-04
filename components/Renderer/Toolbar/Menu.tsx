@@ -39,13 +39,13 @@ const Menu: React.FC = () => {
   return (
     <>
       <div
-        className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center cursor-pointer z-50 dark:bg-neutral-900"
+        className="w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center cursor-pointer z-10 dark:bg-neutral-900"
         onClick={handleMenuClick}
       >
         <MenuIcon isOpen={isOpen} />
       </div>
       <div
-        className={`fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-10 z-50 transition-opacity duration-500 ${
+        className={`fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-10 z-20 transition-opacity duration-500 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={handleOverlayClick}
@@ -53,7 +53,7 @@ const Menu: React.FC = () => {
       <div
         className={`w-auto h-[86vh] bg-white rounded-2xl dark:bg-neutral-800 fixed top-[calc(7vh+32px)] ${
           mode === "single" ? "right-1/4" : " right-[10%]"
-        } z-50 transition-opacity duration-500 transform ${
+        } z-30 transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } shadow-md`}
       >

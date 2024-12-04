@@ -18,7 +18,7 @@ export function ThemeSwitcher() {
   return (
     <>
       <div
-        className="w-12 h-12 bg-white rounded-full mt-4 shadow-md flex items-center justify-center cursor-pointer z-50 dark:bg-neutral-900"
+        className="w-12 h-12 bg-white rounded-full mt-4 shadow-md flex items-center justify-center cursor-pointer z-10 dark:bg-neutral-900"
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       >
         {theme === "dark" ? <Sun /> : <Moon />}
