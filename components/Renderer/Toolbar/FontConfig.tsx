@@ -1,20 +1,21 @@
+import { useBookInfoStore } from "@/store/bookInfoStore";
 import { useFontStore, useRendererConfigStore } from "@/store/fontConfigStore";
 import { useRendererModeStore } from "@/store/rendererModeStore";
 import { Button } from "@nextui-org/button";
 import { Slider } from "@nextui-org/slider";
 import { ALargeSmall, AArrowDown, AArrowUp } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 const FontConfig: React.FC = ({}) => {
   const t = useTranslations("Renderer");
-  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const mode = useRendererModeStore((state) => state.rendererMode);
   const rendererConfig = useRendererConfigStore((state) => state.rendererConfig);
   const setRendererConfig = useRendererConfigStore((state) => state.setRendererConfig);
   const { zhFontFamilies, enFontFamilies } = useFontStore((state) => state);
-  const cuurentFontFamilies = locale === "zh" ? zhFontFamilies : enFontFamilies;
+  const bookInfo = useBookInfoStore((state) => state.bookInfo);
+  const cuurentFontFamilies = bookInfo.language === "zh" ? zhFontFamilies : enFontFamilies;
 
   const handleMenuClick = () => {
     setIsOpen(!isOpen);

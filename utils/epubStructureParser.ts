@@ -1,22 +1,12 @@
+import { BookBasicInfoType } from "@/store/bookInfoStore";
 import JSZip from "jszip";
-
-interface BookBasicInfo {
-  title: string;
-  creator: string;
-  publisher: string;
-  identifier: string;
-  date: string;
-  coverPath: string;
-  coverBlob: Blob | null;
-  toc: { text: string; path: string; file: string }[];
-}
 
 const XML_MIME_TYPE = "application/xml";
 
-const epubStructureParser = async (file: File): Promise<BookBasicInfo> => {
+const epubStructureParser = async (file: File): Promise<BookBasicInfoType> => {
   const reader = new FileReader();
 
-  return new Promise<BookBasicInfo>((resolve, reject) => {
+  return new Promise<BookBasicInfoType>((resolve, reject) => {
     reader.onload = async function (e) {
       try {
         const arrayBuffer = e.target?.result as ArrayBuffer;
@@ -90,7 +80,7 @@ const parseContentOpfPath = (xmlString: string): string | null => {
   return null;
 };
 
-const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
+const epubBasicInfoParser = (content: string): [BookBasicInfoType, string] => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(content, XML_MIME_TYPE);
 
@@ -138,6 +128,10 @@ const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
     return xmlDoc.querySelector("manifest > item[id='ncx']")?.getAttribute("href") as string;
   };
 
+  const getLanaguage = () => {
+    return xmlDoc.querySelector("metadata > language")?.textContent as string;
+  };
+
   return [
     {
       title: getTitle(),
@@ -148,6 +142,7 @@ const epubBasicInfoParser = (content: string): [BookBasicInfo, string] => {
       coverPath: getCoverPath(),
       coverBlob: null,
       toc: [],
+      language: getLanaguage(),
     },
     getTocPath(),
   ];
