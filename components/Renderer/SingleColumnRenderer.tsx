@@ -313,7 +313,13 @@ const EpubReader: React.FC = () => {
       <div className="w-1/2 h-14 bg-white border-b-2 flex fixed items-center pl-4 z-20 inset-x-0 m-auto dark:bg-neutral-900">
         <div className="flex w-full justify-between items-center pr-4">
           <div>
-            <p>{bookInfo.title}</p>
+            <p
+              className={`font-bold text-lg font-XiaLuZhenKai ${
+                bookInfo.language === "zh" ? "" : "italic"
+              }`}
+            >
+              {bookInfo.language === "zh" ? `《${bookInfo.title}》` : bookInfo.title}
+            </p>
           </div>
           <div>
             <LocaleSwitcher />

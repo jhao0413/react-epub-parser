@@ -51,7 +51,7 @@ const Menu: React.FC = () => {
         onClick={handleOverlayClick}
       ></div>
       <div
-        className={`w-auto h-[86vh] bg-white rounded-2xl dark:bg-neutral-800 fixed top-[calc(7vh+32px)] ${
+        className={`w-auto max-w-md min-w-96 h-[86vh] bg-white rounded-2xl dark:bg-neutral-800 fixed top-[calc(7vh+32px)] ${
           mode === "single" ? "right-1/4" : " right-[10%]"
         } z-30 transition-opacity duration-500 transform ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -70,7 +70,7 @@ const Menu: React.FC = () => {
           )}
           <div className="w-4/6 mx-4">
             <Tooltip content={bookInfo.title}>
-              <h2 className="font-bold truncate w-[90%] text-lg font-SiYuanSongTi">
+              <h2 className="font-bold truncate w-[90%] text-lg font-XiaLuZhenKai">
                 {bookInfo.title}
               </h2>
             </Tooltip>
