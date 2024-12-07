@@ -19,6 +19,7 @@ import {
   writeToIframe,
 } from "@/utils/iframeHandler";
 import { applyFontAndThemeStyles } from "@/utils/styleHandler";
+import { useRendererModeStore } from "@/store/rendererModeStore";
 
 const COLUMN_GAP = 100;
 
@@ -34,6 +35,7 @@ const EpubReader: React.FC = () => {
   const bookInfo = useBookInfoStore((state) => state.bookInfo);
   const { theme } = useTheme();
   const bookZip = useBookZipStore((state) => state.bookZip);
+  const rendererMode = useRendererModeStore((state) => state.rendererMode);
 
   useEffect(() => {
     const processChapter = async () => {
@@ -43,7 +45,13 @@ const EpubReader: React.FC = () => {
         currentChapter
       );
       const updatedChapter = await parseAndProcessChapter(chapterContent, bookZip, basePath);
-      const renderer = writeToIframe(updatedChapter, currentFontConfig, theme, COLUMN_GAP);
+      const renderer = writeToIframe(
+        updatedChapter,
+        currentFontConfig,
+        theme,
+        rendererMode,
+        COLUMN_GAP
+      );
       const iframeDoc =
         renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
       if (iframeDoc) {
@@ -63,7 +71,7 @@ const EpubReader: React.FC = () => {
     };
 
     processChapter();
-  }, [bookInfo, bookZip, currentChapter]);
+  }, [bookInfo, bookZip, rendererMode, currentChapter]);
 
   useEffect(() => {
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
@@ -71,8 +79,8 @@ const EpubReader: React.FC = () => {
       throw new Error("Renderer not found");
     }
 
-    applyFontAndThemeStyles(currentFontConfig, theme, COLUMN_GAP);
-  }, [currentFontConfig, theme]);
+    applyFontAndThemeStyles(currentFontConfig, theme, rendererMode, COLUMN_GAP);
+  }, [currentFontConfig, theme, rendererMode]);
 
   const getRendererWindow = () => {
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;

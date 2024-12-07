@@ -6,6 +6,7 @@ export const applyFontAndThemeStyles = (
     fontFormat: string;
   },
   theme: string = "light",
+  mode: string = "double",
   COLUMN_GAP: number
 ) => {
   const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
@@ -37,10 +38,9 @@ export const applyFontAndThemeStyles = (
         `
       : "";
 
-  const styleContent =
-    customFont +
-    `
-       body {
+  const bodyStyle =
+    mode === "double"
+      ? `body {
           columns: 2;
           column-fill: auto;
           word-wrap: break-word;
@@ -48,7 +48,20 @@ export const applyFontAndThemeStyles = (
           column-gap: ${COLUMN_GAP}px;
           font-size: ${fontSize}px !important;
           line-height: 1.5;
-        }
+        }`
+      : `body {
+            word-wrap: break-word;
+            font-size: ${fontSize}px !important;
+            line-height: 2;
+            overflow: hidden;
+            min-height: 80vh;
+            max-height: max-content;
+          }`;
+
+  const styleContent =
+    customFont +
+    `
+        ${bodyStyle}
   
         * {
             font-family: '${fontFamily}' !important;

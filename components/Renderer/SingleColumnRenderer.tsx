@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect } from "react";
-import JSZip from "jszip";
-import { resolvePath } from "@/utils/utils";
 import { Button } from "@nextui-org/button";
 import { useBookInfoStore } from "@/store/bookInfoStore";
 import { useCurrentChapterStore } from "@/store/currentChapterStore";
@@ -11,6 +9,12 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { Github } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Toolbar } from "@/components/Renderer/Toolbar/Index";
+import { applyFontAndThemeStyles } from "@/utils/styleHandler";
+import { useRendererModeStore } from "@/store/rendererModeStore";
+import { loadChapterContent } from "@/utils/chapterLoader";
+import { useBookZipStore } from "@/store/bookZipStore";
+import { parseAndProcessChapter } from "@/utils/chapterParser";
+import { waitForImagesAndCalculatePages, writeToIframe } from "@/utils/iframeHandler";
 
 const EpubReader: React.FC = () => {
   const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
@@ -18,257 +22,40 @@ const EpubReader: React.FC = () => {
   const currentFontConfig = useRendererConfigStore((state) => state.rendererConfig);
   const bookInfo = useBookInfoStore((state) => state.bookInfo);
   const { theme } = useTheme();
+  const bookZip = useBookZipStore((state) => state.bookZip);
+  const rendererMode = useRendererModeStore((state) => state.rendererMode);
 
   useEffect(() => {
-    if (!bookInfo.blob || !bookInfo.toc) {
-      return;
-    }
-
-    JSZip.loadAsync(bookInfo.blob)
-      .then(async (zip) => {
-        const { chapterContent, zip: loadedZip, basePath } = await loadChapterContent(zip);
-        const updatedChapter = await parseAndProcessChapter(chapterContent, loadedZip, basePath);
-        const renderer = writeToIframe(updatedChapter);
-        const iframeDoc =
-          renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-        if (iframeDoc) {
-          await waitForImagesAndCalculatePages(renderer, iframeDoc);
-        } else {
-          console.error("Iframe document not found");
-        }
-
-        return handleIframeLoad(renderer);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-
-    const loadChapterContent = async (zip: JSZip) => {
-      const contentOpfPath = `${
-        bookInfo.toc[currentChapter].path ? bookInfo.toc[currentChapter].path + "/" : ""
-      }${decodeURIComponent(bookInfo.toc[currentChapter].file)}`;
-      const chapterFile = zip.file(contentOpfPath);
-      if (chapterFile) {
-        const chapterContent = await chapterFile.async("string");
-        return {
-          chapterContent,
-          zip,
-          basePath: bookInfo.toc[currentChapter].path,
-        };
-      } else {
-        throw new Error("Content file not found");
-      }
-    };
-
-    const parseAndProcessChapter = async (chapterContent: string, zip: JSZip, basePath: string) => {
-      const parser = new DOMParser();
-      const chapterDoc = parser.parseFromString(chapterContent, "application/xml");
-
-      if (!chapterDoc) {
-        throw new Error("Failed to parse chapter content");
-      }
-
-      const xmlDoc = parser.parseFromString(
-        chapterDoc.documentElement.outerHTML,
-        "application/xml"
+    const processChapter = async () => {
+      const { chapterContent, basePath } = await loadChapterContent(
+        bookZip,
+        bookInfo,
+        currentChapter
       );
-
-      // process link tags
-      const links = xmlDoc.querySelectorAll('link[rel="stylesheet"]');
-      for (const link of Array.from(links)) {
-        const href = link.getAttribute("href") || "";
-        const resolvedPath = resolvePath(basePath, href);
-        const linkCssFile = zip.file(resolvedPath);
-        if (linkCssFile) {
-          const linkCss = await linkCssFile.async("blob");
-          const blobUrl = URL.createObjectURL(linkCss);
-          link.setAttribute("href", blobUrl);
-        }
-      }
-
-      // process img tags
-      const images = xmlDoc.querySelectorAll("img");
-      for (const img of Array.from(images)) {
-        const src = img.getAttribute("src") || "";
-        const resolvedPath = resolvePath(basePath, src);
-        const imgFile = zip.file(resolvedPath);
-        if (imgFile) {
-          const imgBlob = await imgFile.async("blob");
-          const blobUrl = URL.createObjectURL(imgBlob);
-          img.setAttribute("src", blobUrl);
-        }
-      }
-
-      const serializer = new XMLSerializer();
-      const updatedChapter = serializer.serializeToString(xmlDoc);
-      return updatedChapter;
-    };
-
-    const writeToIframe = (updatedChapter: string) => {
-      const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
-      if (!renderer || !renderer.contentWindow) {
-        throw new Error("Renderer not found");
-      }
+      const updatedChapter = await parseAndProcessChapter(chapterContent, bookZip, basePath);
+      const renderer = writeToIframe(updatedChapter, currentFontConfig, theme, rendererMode, 0);
       const iframeDoc =
         renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-      iframeDoc.open();
-      iframeDoc.write(updatedChapter);
-      iframeDoc.close();
-
-      fontChange();
-      return renderer;
-    };
-
-    const waitForImagesAndCalculatePages = (renderer: HTMLIFrameElement, iframeDoc: Document) => {
-      const iframeImages = iframeDoc.images;
-      const imagesLoaded = Array.from(iframeImages).map((img) => {
-        return new Promise((resolve) => {
-          if (img.complete) {
-            resolve(undefined);
-          } else {
-            img.addEventListener("load", resolve);
-            img.addEventListener("error", resolve);
-          }
-        });
-      });
-
-      Promise.all(imagesLoaded).then(() => {
-        if (!renderer?.contentWindow) {
-          console.error("Renderer not found");
-          return;
-        }
-      });
-    };
-
-    const fontChange = () => {
-      const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
-
-      const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
-      if (!renderer || !renderer.contentWindow) {
-        throw new Error("Renderer not found");
-      }
-      const iframeDoc =
-        renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-      const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 2 : 0;
-      const style = iframeDoc.querySelector("style");
-
-      const customFont =
-        fontFamily === "sans"
-          ? ""
-          : `@font-face {
-            font-family: '${fontFamily}';
-            font-style: normal;
-            src: url(${fontUrl}) format('${fontFormat}');
-          }`;
-
-      const themeStyle =
-        theme === "dark"
-          ? `
-          color: #FFF !important;
-          background-color: #171717 !important;
-        `
-          : "";
-
-      const styleContent =
-        customFont +
-        `
-          body {
-            word-wrap: break-word;
-            font-size: ${fontSize}px !important;
-            line-height: 2;
-            overflow: hidden;
-            min-height: 80vh;
-            max-height: max-content;
-          }
-  
-          * {
-              font-family: '${fontFamily}' !important;
-              ${themeStyle}
-          }
-    
-          a {
-            text-decoration: none;
-          }
-    
-          img {
-            max-width: ${imgMaxWidth}px;
-            height: auto;
-          }
-        `;
-
-      if (style) {
-        style.innerHTML = styleContent;
+      if (iframeDoc) {
+        waitForImagesAndCalculatePages(renderer, iframeDoc);
       } else {
-        const newStyle = iframeDoc.createElement("style");
-        newStyle.innerHTML = styleContent;
-        iframeDoc.head.appendChild(newStyle);
+        console.error("Iframe document not found");
       }
+
+      return handleIframeLoad(renderer);
     };
-  }, [bookInfo, currentChapter]);
+
+    processChapter();
+  }, [bookInfo, bookZip, currentChapter]);
 
   useEffect(() => {
-    const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
-
     const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
     if (!renderer || !renderer.contentWindow) {
       throw new Error("Renderer not found");
     }
-    const iframeDoc =
-      renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
-    const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 2 : 0;
-    const style = iframeDoc.querySelector("style");
 
-    const customFont =
-      fontFamily === "sans"
-        ? ""
-        : `@font-face {
-            font-family: '${fontFamily}';
-            font-style: normal;
-            src: url(${fontUrl}) format('${fontFormat}');
-          }`;
-
-    const themeStyle =
-      theme === "dark"
-        ? `
-          color: #FFF !important;
-          background-color: #171717 !important;
-        `
-        : "";
-
-    const styleContent =
-      customFont +
-      `
-          body {
-            word-wrap: break-word;
-            font-size: ${fontSize}px !important;
-            line-height: 2;
-            overflow: hidden;
-            min-height: 80vh;
-          }
-  
-          * {
-              font-family: '${fontFamily}' !important;
-              ${themeStyle}
-          }
-    
-          a {
-            text-decoration: none;
-          }
-    
-          img {
-            max-width: ${imgMaxWidth}px;
-            height: auto;
-          }
-        `;
-
-    if (style) {
-      style.innerHTML = styleContent;
-    } else {
-      const newStyle = iframeDoc.createElement("style");
-      newStyle.innerHTML = styleContent;
-      iframeDoc.head.appendChild(newStyle);
-    }
-  }, [currentFontConfig, theme]);
+    applyFontAndThemeStyles(currentFontConfig, theme, rendererMode, 0);
+  }, [currentFontConfig, theme, rendererMode]);
 
   const handleIframeLoad = (renderer: HTMLIFrameElement) => {
     renderer.style.visibility = "hidden";

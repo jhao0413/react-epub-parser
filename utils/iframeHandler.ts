@@ -9,6 +9,7 @@ export const writeToIframe = (
     fontFormat: string;
   },
   theme: string = "light",
+  mode: string = "double",
   COLUMN_GAP: number
 ) => {
   const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
@@ -21,7 +22,7 @@ export const writeToIframe = (
   iframeDoc.write(updatedChapter);
   iframeDoc.close();
 
-  applyFontAndThemeStyles(currentFontConfig, theme, COLUMN_GAP);
+  applyFontAndThemeStyles(currentFontConfig, theme, mode, COLUMN_GAP);
   return renderer;
 };
 
