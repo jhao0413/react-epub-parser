@@ -15,8 +15,10 @@ import { loadChapterContent } from "@/utils/chapterLoader";
 import { useBookZipStore } from "@/store/bookZipStore";
 import { parseAndProcessChapter } from "@/utils/chapterParser";
 import { waitForImagesAndCalculatePages, writeToIframe } from "@/utils/iframeHandler";
+import { useTranslations } from "next-intl";
 
 const EpubReader: React.FC = () => {
+  const t = useTranslations("SingleColumnRenderer");
   const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore((state) => state.setCurrentChapter);
   const currentFontConfig = useRendererConfigStore((state) => state.rendererConfig);
@@ -130,14 +132,14 @@ const EpubReader: React.FC = () => {
             className="text-base rounded-md w-40 dark:bg-neutral-900"
             onClick={handlePrevChapter}
           >
-            上一章
+            {t("previous")}
           </Button>
           <Button
             variant="bordered"
             className="text-base rounded-md w-40 dark:bg-neutral-900"
             onClick={handleNextChapter}
           >
-            下一章
+            {t("next")}
           </Button>
         </div>
 

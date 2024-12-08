@@ -10,5 +10,9 @@
         "next": "Next",
         "fontSize": "Font Size",
         "fontFamily": "Font Family"
+    },
+    "SingleColumnRenderer": {
+        "previous": "Previous",
+        "next": "Next"
     }
 }

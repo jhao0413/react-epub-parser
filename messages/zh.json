@@ -10,5 +10,9 @@
         "next": "下一页",
         "fontSize": "字号大小",
         "fontFamily": "字体"
+    },
+    "SingleColumnRenderer": {
+        "previous": "上一章",
+        "next": "下一章"
     }
 }
