@@ -39,11 +39,17 @@ function App() {
     const file = files[0];
 
     if (file) {
+      const fileSizeInBytes = file.size;
+      const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
       const fileBlob = await getFileBinary(file);
       const jsZip = await loadZip(file);
       setBookZip(jsZip);
       const bookParserInfo = await epubStructureParser(file);
-      setBookInfo({ blob: fileBlob as Blob, ...bookParserInfo });
+      setBookInfo({
+        blob: fileBlob as Blob,
+        ...bookParserInfo,
+        size: `${parseFloat(fileSizeInMB)} MB`,
+      });
     }
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, Github } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@nextui-org/button";
 import { useBookInfoStore } from "@/store/bookInfoStore";
@@ -20,11 +20,16 @@ import {
 } from "@/utils/iframeHandler";
 import { applyFontAndThemeStyles } from "@/utils/styleHandler";
 import { useRendererModeStore } from "@/store/rendererModeStore";
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@nextui-org/modal";
+import { Image } from "@nextui-org/image";
+import { Tooltip } from "@nextui-org/tooltip";
+import dayjs from "dayjs";
 
 const COLUMN_GAP = 100;
 
 const EpubReader: React.FC = () => {
   const t = useTranslations("Renderer");
+  const tModal = useTranslations("BookInfoModal");
   const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore((state) => state.setCurrentChapter);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
@@ -126,10 +131,13 @@ const EpubReader: React.FC = () => {
     }
   };
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <div className="w-full h-screen bg-gray-100 flex justify-center items-center flex-col dark:bg-neutral-800">
       <div className="flex w-4/5 h-12 justify-between items-center">
-        <div>
+        <div className="flex items-center cursor-pointer" onClick={onOpen}>
+          <BookOpen size={20} />
           <p
             className={`font-bold text-lg font-XiaLuZhenKai ${
               bookInfo.language === "zh" ? "" : "italic"
@@ -179,6 +187,71 @@ const EpubReader: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <Modal backdrop="blur" size="2xl" isOpen={isOpen} onClose={onClose} className="pb-6">
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader>
+                <div className="flex items-center">
+                  <BookOpen size={16} className="mr-2" />
+                  {tModal("title")}
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className="flex">
+                  <div className="mr-10">
+                    <Image
+                      isBlurred
+                      alt="Event image"
+                      width={300}
+                      src={bookInfo.coverBlob ? URL.createObjectURL(bookInfo.coverBlob) : ""}
+                    />
+                  </div>
+
+                  <div className="flex flex-col">
+                    <Tooltip content={bookInfo.title}>
+                      <h2 className="font-bold truncate w-[90%] text-2xl font-XiaLuZhenKai mb-2">
+                        {bookInfo.title}
+                      </h2>
+                    </Tooltip>
+                    {bookInfo.creator && (
+                      <p className="mb-2">
+                        <span className="font-bold">{tModal("author")}：</span>
+                        {bookInfo.creator}
+                      </p>
+                    )}
+                    {bookInfo.language && (
+                      <p className="mb-2">
+                        <span className="font-bold">{tModal("language")}：</span>
+                        {bookInfo.language}
+                      </p>
+                    )}
+                    {bookInfo.size && (
+                      <p className="mb-2">
+                        <span className="font-bold">{tModal("size")} :</span>
+                        {bookInfo.size}
+                      </p>
+                    )}
+                    {bookInfo.publisher && (
+                      <p className="mb-2">
+                        <span className="font-bold">{tModal("publisher")} :</span>
+                        {bookInfo.publisher}
+                      </p>
+                    )}
+                    {bookInfo.date && (
+                      <p className="mb-2">
+                        <span className="font-bold">{tModal("publicationDate")} :</span>
+                        {dayjs(bookInfo.date).format("YYYY-MM-DD")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

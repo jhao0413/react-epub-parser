@@ -11,6 +11,7 @@ export type BookBasicInfoType = {
   toc: { text: string; path: string; file: string }[];
   blob?: Blob;
   language: string;
+  size?: string;
 };
 
 type BookInfoStore = {
@@ -30,6 +31,7 @@ export const useBookInfoStore = create<BookInfoStore>((set) => ({
     toc: [],
     blob: new Blob(),
     language: "",
+    size: "",
   },
   setBookInfo: (info: BookBasicInfoType) => set({ bookInfo: info }),
 }));

@@ -14,5 +14,13 @@
     "SingleColumnRenderer": {
         "previous": "Previous",
         "next": "Next"
+    },
+    "BookInfoModal": {
+        "title": "Book Information",
+        "author": "Author",
+        "publisher": "Publisher",
+        "publicationDate": "Publication Date",
+        "size": "Size",
+        "language": "Language"
     }
 }

@@ -11,7 +11,9 @@
   "dependencies": {
     "@nextui-org/button": "^2.0.38",
     "@nextui-org/dropdown": "^2.1.31",
+    "@nextui-org/image": "^2.2.3",
     "@nextui-org/input": "^2.2.5",
+    "@nextui-org/modal": "^2.2.3",
     "@nextui-org/slider": "^2.2.17",
     "@nextui-org/system": "^2.2.6",
     "@nextui-org/theme": "^2.2.11",
@@ -24,6 +26,7 @@
     "@radix-ui/react-tooltip": "^1.1.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dayjs": "^1.11.13",
     "dompurify": "^3.1.7",
     "file-saver": "^2.0.5",
     "framer-motion": "^11.13.1",
