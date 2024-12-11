@@ -18,8 +18,24 @@ export const writeToIframe = (
   }
   const iframeDoc =
     renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
+
+  const script = `
+    <script>
+      document.addEventListener('keydown', function(e) {
+        // Create a new event and dispatch it to the parent window
+        const event = new KeyboardEvent('keydown', {
+          key: e.key,
+          code: e.code,
+          keyCode: e.keyCode,
+          bubbles: true,
+          cancelable: true
+        });
+        window.parent.document.dispatchEvent(event);
+      });
+    </script>
+  `;
   iframeDoc.open();
-  iframeDoc.write(updatedChapter);
+  iframeDoc.write(updatedChapter + script);
   iframeDoc.close();
 
   applyFontAndThemeStyles(currentFontConfig, theme, mode, COLUMN_GAP);

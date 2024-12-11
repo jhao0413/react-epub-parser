@@ -24,7 +24,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@nex
 import { Image } from "@nextui-org/image";
 import { Tooltip } from "@nextui-org/tooltip";
 import dayjs from "dayjs";
-
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 const COLUMN_GAP = 100;
 
 const EpubReader: React.FC = () => {
@@ -130,6 +130,11 @@ const EpubReader: React.FC = () => {
       setCurrentPageIndex(currentPageIndex - 1);
     }
   };
+
+  useKeyboardNavigation({
+    onPrevious: handlePrevPage,
+    onNext: handleNextPage,
+  });
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@nextui-org/modal";
 import { Image } from "@nextui-org/image";
 import { Tooltip } from "@nextui-org/tooltip";
+import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
 import dayjs from "dayjs";
 
 const EpubReader: React.FC = () => {
@@ -100,6 +101,11 @@ const EpubReader: React.FC = () => {
   const handleNextChapter = () => {
     setCurrentChapter(currentChapter + 1);
   };
+
+  useKeyboardNavigation({
+    onPrevious: handlePrevChapter,
+    onNext: handleNextChapter,
+  });
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 

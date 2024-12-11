@@ -315,7 +315,7 @@
   resolved "https://registry.npmmirror.com/@nextui-org/dom-animation/-/dom-animation-2.1.1.tgz#42611dc7aff1a6ca11ff3d7683ea754a35ec8577"
   integrity sha512-xLrVNf1EV9zyyZjk6j3RptOvnga1WUCbMpDgJLQHp+oYwxTfBy0SkXHuN5pRdcR0XpR/IqRBDIobMdZI0iyQyg==
 
-"@nextui-org/dropdown@^2.1.31":
+"@nextui-org/dropdown@2.1.31":
   version "2.1.31"
   resolved "https://registry.npmmirror.com/@nextui-org/dropdown/-/dropdown-2.1.31.tgz#4606509b00101f9a04a420400837485fe0390081"
   integrity sha512-tP6c5MAhWK4hJ6U02oX6APUpjjrn97Zn7t+56Xx4YyQOSj0CJx18VF0JsU+MrjFZxPX3UBKU3B2zGBHOEGE4Kw==
