@@ -1,17 +1,17 @@
-"use client";
-import { Languages } from "lucide-react";
-import { Dropdown, DropdownTrigger, DropdownItem, DropdownMenu } from "@nextui-org/dropdown";
-import { Button } from "@nextui-org/button";
-import { useTransition } from "react";
-import { setUserLocale } from "@/hooks/useLocale";
-import { Locale } from "@/i18n/config";
-import { useLocale } from "next-intl";
-import { useRendererModeStore } from "@/store/rendererModeStore";
+'use client';
+import { Languages } from 'lucide-react';
+import { Dropdown, DropdownTrigger, DropdownItem, DropdownMenu } from '@nextui-org/dropdown';
+import { Button } from '@nextui-org/button';
+import { useTransition } from 'react';
+import { setUserLocale } from '@/hooks/useLocale';
+import { Locale } from '@/i18n/config';
+import { useLocale } from 'next-intl';
+import { useRendererModeStore } from '@/store/rendererModeStore';
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
   const [, startTransition] = useTransition();
-  const mode = useRendererModeStore((state) => state.rendererMode);
+  const mode = useRendererModeStore(state => state.rendererMode);
 
   function onChange(value: string) {
     const locale = value as Locale;
@@ -27,9 +27,8 @@ export default function LocaleSwitcher() {
         <Button
           className=" bg-white dark:bg-neutral-900"
           isIconOnly
-          variant={mode === "single" ? "bordered" : "shadow"}
-          radius="sm"
-        >
+          variant={mode === 'single' ? 'bordered' : 'shadow'}
+          radius="sm">
           <Languages className="cursor-pointer" size={16} />
         </Button>
       </DropdownTrigger>
@@ -38,8 +37,7 @@ export default function LocaleSwitcher() {
         variant="light"
         selectionMode="single"
         selectedKeys={[locale]}
-        onAction={(key) => onChange(String(key))}
-      >
+        onAction={key => onChange(String(key))}>
         <DropdownItem key="en">English</DropdownItem>
         <DropdownItem key="zh">简体中文</DropdownItem>
       </DropdownMenu>

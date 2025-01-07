@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import type { Variants } from "motion/react";
-import { motion, useAnimation } from "motion/react";
-import { useEffect } from "react";
+import type { Variants } from 'motion/react';
+import { motion, useAnimation } from 'motion/react';
+import { useEffect } from 'react';
 
 const lineVariants: Variants = {
   normal: {
@@ -15,7 +15,7 @@ const lineVariants: Variants = {
     y: custom === 1 ? 6 : custom === 3 ? -6 : 0,
     opacity: custom === 2 ? 0 : 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 260,
       damping: 20,
     },
@@ -31,9 +31,9 @@ const MenuIcon: React.FC<MenuIconProps> = ({ isOpen }: MenuIconProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      controls.start("animate");
+      controls.start('animate');
     } else {
-      controls.start("normal");
+      controls.start('normal');
     }
   }, [isOpen, controls]);
 
@@ -48,8 +48,7 @@ const MenuIcon: React.FC<MenuIconProps> = ({ isOpen }: MenuIconProps) => {
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+        strokeLinejoin="round">
         <motion.line
           x1="4"
           y1="6"

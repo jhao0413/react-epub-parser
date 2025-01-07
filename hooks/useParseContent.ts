@@ -1,4 +1,4 @@
-import JSZip from "jszip";
+import JSZip from 'jszip';
 
 export const useLoadChapterContent = async (
   zip: JSZip,
@@ -6,17 +6,17 @@ export const useLoadChapterContent = async (
   currentChapter: number
 ): Promise<{ chapterContent: string; zip: JSZip; basePath: string }> => {
   const contentOpfPath = `${
-    toc[currentChapter].path ? toc[currentChapter].path + "/" : ""
+    toc[currentChapter].path ? toc[currentChapter].path + '/' : ''
   }${decodeURIComponent(toc[currentChapter].file)}`;
   const chapterFile = zip.file(contentOpfPath);
   if (chapterFile) {
-    const chapterContent = await chapterFile.async("string");
+    const chapterContent = await chapterFile.async('string');
     return {
       chapterContent,
       zip,
       basePath: toc[currentChapter].path,
     };
   } else {
-    throw new Error("Content file not found");
+    throw new Error('Content file not found');
   }
 };

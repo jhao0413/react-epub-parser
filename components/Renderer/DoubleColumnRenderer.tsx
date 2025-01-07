@@ -1,46 +1,46 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { BookOpen, ChevronLeft, ChevronRight, Github } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Button } from "@nextui-org/button";
-import { useBookInfoStore } from "@/store/bookInfoStore";
-import { useCurrentChapterStore } from "@/store/currentChapterStore";
-import { useRendererConfigStore } from "@/store/fontConfigStore";
-import { Toolbar } from "@/components/Renderer/Toolbar/Index";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
-import { useTheme } from "next-themes";
-import { useBookZipStore } from "@/store/bookZipStore";
-import { loadChapterContent } from "@/utils/chapterLoader";
-import { parseAndProcessChapter } from "@/utils/chapterParser";
+import React, { useState, useEffect, useRef } from 'react';
+import { BookOpen, ChevronLeft, ChevronRight, Github } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Button } from '@nextui-org/button';
+import { useBookInfoStore } from '@/store/bookInfoStore';
+import { useCurrentChapterStore } from '@/store/currentChapterStore';
+import { useRendererConfigStore } from '@/store/fontConfigStore';
+import { Toolbar } from '@/components/Renderer/Toolbar/Index';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
+import { useTheme } from 'next-themes';
+import { useBookZipStore } from '@/store/bookZipStore';
+import { loadChapterContent } from '@/utils/chapterLoader';
+import { parseAndProcessChapter } from '@/utils/chapterParser';
 import {
   handleIframeLoad,
   waitForImagesAndCalculatePages,
   writeToIframe,
-} from "@/utils/iframeHandler";
-import { applyFontAndThemeStyles } from "@/utils/styleHandler";
-import { useRendererModeStore } from "@/store/rendererModeStore";
-import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@nextui-org/modal";
-import { Image } from "@nextui-org/image";
-import { Tooltip } from "@nextui-org/tooltip";
-import dayjs from "dayjs";
-import { useKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
+} from '@/utils/iframeHandler';
+import { applyFontAndThemeStyles } from '@/utils/styleHandler';
+import { useRendererModeStore } from '@/store/rendererModeStore';
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@nextui-org/modal';
+import { Image } from '@nextui-org/image';
+import { Tooltip } from '@nextui-org/tooltip';
+import dayjs from 'dayjs';
+import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 const COLUMN_GAP = 100;
 
 const EpubReader: React.FC = () => {
-  const t = useTranslations("Renderer");
-  const tModal = useTranslations("BookInfoModal");
-  const currentChapter = useCurrentChapterStore((state) => state.currentChapter);
-  const setCurrentChapter = useCurrentChapterStore((state) => state.setCurrentChapter);
+  const t = useTranslations('Renderer');
+  const tModal = useTranslations('BookInfoModal');
+  const currentChapter = useCurrentChapterStore(state => state.currentChapter);
+  const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
-  const currentFontConfig = useRendererConfigStore((state) => state.rendererConfig);
-  const bookInfo = useBookInfoStore((state) => state.bookInfo);
+  const currentFontConfig = useRendererConfigStore(state => state.rendererConfig);
+  const bookInfo = useBookInfoStore(state => state.bookInfo);
   const { theme } = useTheme();
-  const bookZip = useBookZipStore((state) => state.bookZip);
-  const rendererMode = useRendererModeStore((state) => state.rendererMode);
+  const bookZip = useBookZipStore(state => state.bookZip);
+  const rendererMode = useRendererModeStore(state => state.rendererMode);
 
   useEffect(() => {
     const processChapter = async () => {
@@ -62,7 +62,7 @@ const EpubReader: React.FC = () => {
       if (iframeDoc) {
         waitForImagesAndCalculatePages(renderer, iframeDoc);
       } else {
-        console.error("Iframe document not found");
+        console.error('Iframe document not found');
       }
 
       return handleIframeLoad(
@@ -79,20 +79,20 @@ const EpubReader: React.FC = () => {
   }, [bookInfo, bookZip, rendererMode, currentChapter]);
 
   useEffect(() => {
-    const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+    const renderer = document.getElementById('epub-renderer') as HTMLIFrameElement;
     if (!renderer || !renderer.contentWindow) {
-      throw new Error("Renderer not found");
+      throw new Error('Renderer not found');
     }
 
     applyFontAndThemeStyles(currentFontConfig, theme, rendererMode, COLUMN_GAP);
   }, [currentFontConfig, theme, rendererMode]);
 
   const getRendererWindow = () => {
-    const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+    const renderer = document.getElementById('epub-renderer') as HTMLIFrameElement;
     if (renderer?.contentWindow) {
       return renderer.contentWindow;
     } else {
-      console.error("Renderer not found");
+      console.error('Renderer not found');
       return null;
     }
   };
@@ -145,10 +145,10 @@ const EpubReader: React.FC = () => {
           <BookOpen size={20} />
           <p
             className={`font-bold text-lg font-XiaLuZhenKai ${
-              bookInfo.language === "zh" ? "" : "italic"
+              bookInfo.language === 'zh' ? '' : 'italic'
             }`}
           >
-            {bookInfo.language === "zh" ? `《${bookInfo.title}》` : bookInfo.title}
+            {bookInfo.language === 'zh' ? `《${bookInfo.title}》` : bookInfo.title}
           </p>
         </div>
         <div>
@@ -158,7 +158,7 @@ const EpubReader: React.FC = () => {
             isIconOnly
             variant="shadow"
             radius="sm"
-            onClick={() => window.open("https://github.com/jhao0413/react-epub-parser", "_blank")}
+            onClick={() => window.open('https://github.com/jhao0413/react-epub-parser', '_blank')}
           >
             <Github size={16} className="dark:bg-neutral-900" />
           </Button>
@@ -166,7 +166,7 @@ const EpubReader: React.FC = () => {
       </div>
       <div className="w-4/5 h-[86vh] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
         <div className="h-full relative">
-          <iframe id="epub-renderer" style={{ width: "100%", height: "100%" }}></iframe>
+          <iframe id="epub-renderer" style={{ width: '100%', height: '100%' }}></iframe>
           <div className="w-full flex justify-between">
             <Button
               radius="full"
@@ -175,7 +175,7 @@ const EpubReader: React.FC = () => {
               onClick={handlePrevPage}
             >
               <ChevronLeft size={16} />
-              {t("previous")}
+              {t('previous')}
             </Button>
             <Button
               radius="full"
@@ -183,7 +183,7 @@ const EpubReader: React.FC = () => {
               className="bg-white border-2 border-inherit dark:bg-neutral-900"
               onClick={handleNextPage}
             >
-              {t("next")}
+              {t('next')}
               <ChevronRight size={16} />
             </Button>
           </div>
@@ -200,7 +200,7 @@ const EpubReader: React.FC = () => {
               <ModalHeader>
                 <div className="flex items-center">
                   <BookOpen size={16} className="mr-2" />
-                  {tModal("title")}
+                  {tModal('title')}
                 </div>
               </ModalHeader>
               <ModalBody>
@@ -210,7 +210,7 @@ const EpubReader: React.FC = () => {
                       isBlurred
                       alt="Event image"
                       width={300}
-                      src={bookInfo.coverBlob ? URL.createObjectURL(bookInfo.coverBlob) : ""}
+                      src={bookInfo.coverBlob ? URL.createObjectURL(bookInfo.coverBlob) : ''}
                     />
                   </div>
 
@@ -222,32 +222,32 @@ const EpubReader: React.FC = () => {
                     </Tooltip>
                     {bookInfo.creator && (
                       <p className="mb-2">
-                        <span className="font-bold">{tModal("author")}：</span>
+                        <span className="font-bold">{tModal('author')}：</span>
                         {bookInfo.creator}
                       </p>
                     )}
                     {bookInfo.language && (
                       <p className="mb-2">
-                        <span className="font-bold">{tModal("language")}：</span>
+                        <span className="font-bold">{tModal('language')}：</span>
                         {bookInfo.language}
                       </p>
                     )}
                     {bookInfo.size && (
                       <p className="mb-2">
-                        <span className="font-bold">{tModal("size")} :</span>
+                        <span className="font-bold">{tModal('size')} :</span>
                         {bookInfo.size}
                       </p>
                     )}
                     {bookInfo.publisher && (
                       <p className="mb-2">
-                        <span className="font-bold">{tModal("publisher")} :</span>
+                        <span className="font-bold">{tModal('publisher')} :</span>
                         {bookInfo.publisher}
                       </p>
                     )}
                     {bookInfo.date && (
                       <p className="mb-2">
-                        <span className="font-bold">{tModal("publicationDate")} :</span>
-                        {dayjs(bookInfo.date).format("YYYY-MM-DD")}
+                        <span className="font-bold">{tModal('publicationDate')} :</span>
+                        {dayjs(bookInfo.date).format('YYYY-MM-DD')}
                       </p>
                     )}
                   </div>
