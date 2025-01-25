@@ -5,25 +5,25 @@ export const applyFontAndThemeStyles = (
     fontUrl: string;
     fontFormat: string;
   },
-  theme: string = "light",
-  mode: string = "double",
+  theme: string = 'light',
+  mode: string = 'double',
   COLUMN_GAP: number
 ) => {
   const { fontSize, fontFamily, fontUrl, fontFormat } = currentFontConfig;
 
-  const renderer = document.getElementById("epub-renderer") as HTMLIFrameElement;
+  const renderer = document.getElementById('epub-renderer') as HTMLIFrameElement;
   if (!renderer || !renderer.contentWindow) {
-    throw new Error("Renderer not found");
+    throw new Error('Renderer not found');
   }
   const iframeDoc =
     renderer.contentDocument || (renderer.contentWindow && renderer.contentWindow.document);
 
   const imgMaxWidth = renderer.scrollWidth ? renderer.scrollWidth / 3.5 : 0;
-  const style = iframeDoc.querySelector("style");
+  const style = iframeDoc.querySelector('style');
 
   const customFont =
-    fontFamily === "sans"
-      ? ""
+    fontFamily === 'sans'
+      ? ''
       : `@font-face {
             font-family: '${fontFamily}';
             font-style: normal;
@@ -31,15 +31,15 @@ export const applyFontAndThemeStyles = (
           }`;
 
   const themeStyle =
-    theme === "dark"
+    theme === 'dark'
       ? `
           color: #FFF !important;
           background-color: #171717 !important;
         `
-      : "";
+      : '';
 
   const bodyStyle =
-    mode === "double"
+    mode === 'double'
       ? `body {
           columns: 2;
           column-fill: auto;
@@ -47,12 +47,12 @@ export const applyFontAndThemeStyles = (
           overflow: hidden;
           column-gap: ${COLUMN_GAP}px;
           font-size: ${fontSize}px !important;
-          line-height: 1.5;
+          line-height: 2.5 !important;
         }`
       : `body {
             word-wrap: break-word;
             font-size: ${fontSize}px !important;
-            line-height: 2;
+            line-height: 2.5 !important;
             overflow: hidden;
             min-height: 80vh;
             max-height: max-content;
@@ -81,7 +81,7 @@ export const applyFontAndThemeStyles = (
   if (style) {
     style.innerHTML = styleContent;
   } else {
-    const newStyle = iframeDoc.createElement("style");
+    const newStyle = iframeDoc.createElement('style');
     newStyle.innerHTML = styleContent;
     iframeDoc.head.appendChild(newStyle);
   }
