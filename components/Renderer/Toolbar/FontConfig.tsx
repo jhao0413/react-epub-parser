@@ -1,8 +1,8 @@
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useFontStore, useRendererConfigStore } from '@/store/fontConfigStore';
 import { useRendererModeStore } from '@/store/rendererModeStore';
-import { Button } from '@nextui-org/button';
-import { Slider } from '@nextui-org/slider';
+import { Button } from "@heroui/button";
+import { Slider } from "@heroui/slider";
 import { ALargeSmall, AArrowDown, AArrowUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';

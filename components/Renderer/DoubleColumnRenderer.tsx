@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Github } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Button } from '@nextui-org/button';
+import { Button } from "@heroui/button";
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useCurrentChapterStore } from '@/store/currentChapterStore';
 import { useRendererConfigStore } from '@/store/fontConfigStore';
@@ -20,9 +20,9 @@ import {
 } from '@/utils/iframeHandler';
 import { applyFontAndThemeStyles } from '@/utils/styleHandler';
 import { useRendererModeStore } from '@/store/rendererModeStore';
-import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@nextui-org/modal';
-import { Image } from '@nextui-org/image';
-import { Tooltip } from '@nextui-org/tooltip';
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@heroui/modal";
+import { Image } from "@heroui/image";
+import { Tooltip } from "@heroui/tooltip";
 import dayjs from 'dayjs';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 const COLUMN_GAP = 100;

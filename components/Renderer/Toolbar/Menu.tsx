@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MenuIcon } from '@/components/ui/menu';
-import { Tooltip } from '@nextui-org/tooltip';
+import { Tooltip } from "@heroui/tooltip";
 import { useRendererModeStore } from '@/store/rendererModeStore';
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useCurrentChapterStore } from '@/store/currentChapterStore';

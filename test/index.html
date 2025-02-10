@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .container {
+        columns: 2;
+        height: 200px;
+        width: 50vw;
+        word-wrap: break-word;
+        overflow: hidden;
+        column-gap: 100px;
+        font-size: 20px !important;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p>这是第一个段落。</p>
+      <p>这是第二个段落。</p>
+      <p>这是第三个段落。</p>
+      <p>这是第四个段落。</p>
+      <p>这是第五个段落。</p>
+      <p>这是第六个段落。</p>
+      <p>这是第七个段落。</p>
+      <p>这是第八个段落。</p>
+      <p>这是第九个段落。</p>
+      <p>这是第十个段落。</p>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.container');
+        const paragraphs = container.querySelectorAll('p');
+        let visibleContent = '';
+        let accumulatedHeight = 0;
+        const columnHeight = container.getBoundingClientRect().height; // 每列的高度
+
+        paragraphs.forEach(paragraph => {
+          const paragraphRect = paragraph.getBoundingClientRect();
+          const style = window.getComputedStyle(paragraph);
+          const margin = parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+          const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+          const paragraphHeight = paragraphRect.height + margin + padding;
+
+          // 计算段落在当前列中可见的部分
+          if (accumulatedHeight + paragraphHeight > columnHeight) {
+            const visibleHeight = columnHeight - accumulatedHeight;
+            const visibleRatio = visibleHeight / paragraphHeight;
+            const visibleText = paragraph.innerText.slice(
+              0,
+              Math.floor(paragraph.innerText.length * visibleRatio)
+            );
+            visibleContent += visibleText + '\n';
+            accumulatedHeight = paragraphHeight - visibleHeight; // 剩余部分进入下一列
+          } else {
+            visibleContent += paragraph.innerText + '\n';
+            accumulatedHeight += paragraphHeight;
+          }
+
+          // 如果累积高度超过一列，重置为下一列
+          if (accumulatedHeight >= columnHeight) {
+            accumulatedHeight -= columnHeight;
+          }
+        });
+
+        console.log('750px宽度内可见内容:');
+        console.log(visibleContent.trim());
+      });
+    </script>
+  </body>
+</html>

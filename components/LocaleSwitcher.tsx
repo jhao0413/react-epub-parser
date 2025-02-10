@@ -1,7 +1,7 @@
 'use client';
 import { Languages } from 'lucide-react';
-import { Dropdown, DropdownTrigger, DropdownItem, DropdownMenu } from '@nextui-org/dropdown';
-import { Button } from '@nextui-org/button';
+import { Dropdown, DropdownTrigger, DropdownItem, DropdownMenu } from "@heroui/dropdown";
+import { Button } from "@heroui/button";
 import { useTransition } from 'react';
 import { setUserLocale } from '@/hooks/useLocale';
 import { Locale } from '@/i18n/config';

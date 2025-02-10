@@ -47,7 +47,7 @@ export const applyFontAndThemeStyles = (
           overflow: hidden;
           column-gap: ${COLUMN_GAP}px;
           font-size: ${fontSize}px !important;
-          line-height: 2.5 !important;
+          line-height: 2 !important;
         }`
       : `body {
             word-wrap: break-word;

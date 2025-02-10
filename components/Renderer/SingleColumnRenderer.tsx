@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button } from '@nextui-org/button';
+import { Button } from "@heroui/button";
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useCurrentChapterStore } from '@/store/currentChapterStore';
 import { useRendererConfigStore } from '@/store/fontConfigStore';
@@ -16,9 +16,9 @@ import { useBookZipStore } from '@/store/bookZipStore';
 import { parseAndProcessChapter } from '@/utils/chapterParser';
 import { waitForImagesAndCalculatePages, writeToIframe } from '@/utils/iframeHandler';
 import { useTranslations } from 'next-intl';
-import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@nextui-org/modal';
-import { Image } from '@nextui-org/image';
-import { Tooltip } from '@nextui-org/tooltip';
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@heroui/modal";
+import { Image } from "@heroui/image";
+import { Tooltip } from "@heroui/tooltip";
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import dayjs from 'dayjs';
 
