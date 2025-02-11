@@ -1,8 +1,8 @@
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useFontStore, useRendererConfigStore } from '@/store/fontConfigStore';
 import { useRendererModeStore } from '@/store/rendererModeStore';
-import { Button } from "@heroui/button";
-import { Slider } from "@heroui/slider";
+import { Button } from '@heroui/button';
+import { Slider } from '@heroui/slider';
 import { ALargeSmall, AArrowDown, AArrowUp } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -84,7 +84,7 @@ const FontConfig: React.FC = ({}) => {
               color={rendererConfig.fontFamily === font.value ? 'primary' : 'default'}
               className={`min-w-36 bg-white dark:bg-neutral-700 p-1 rounded-md mt-2 font-${font.value} text-base`}
               style={{ fontFamily: font.value }}
-              onClick={() => onFontFamilyChange(font.value)}>
+              onPress={() => onFontFamilyChange(font.value)}>
               {font.name}
             </Button>
           ))}

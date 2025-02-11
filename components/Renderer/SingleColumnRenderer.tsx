@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button } from "@heroui/button";
+import { Button } from '@heroui/button';
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useCurrentChapterStore } from '@/store/currentChapterStore';
 import { useRendererConfigStore } from '@/store/fontConfigStore';
@@ -16,9 +16,9 @@ import { useBookZipStore } from '@/store/bookZipStore';
 import { parseAndProcessChapter } from '@/utils/chapterParser';
 import { waitForImagesAndCalculatePages, writeToIframe } from '@/utils/iframeHandler';
 import { useTranslations } from 'next-intl';
-import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@heroui/modal";
-import { Image } from "@heroui/image";
-import { Tooltip } from "@heroui/tooltip";
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@heroui/modal';
+import { Image } from '@heroui/image';
+import { Tooltip } from '@heroui/tooltip';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import dayjs from 'dayjs';
 
@@ -130,7 +130,7 @@ const EpubReader: React.FC = () => {
               isIconOnly
               variant="bordered"
               radius="sm"
-              onClick={() =>
+              onPress={() =>
                 window.open('https://github.com/jhao0413/react-epub-parser', '_blank')
               }>
               <Github size={16} className="dark:bg-neutral-900" />
@@ -144,13 +144,13 @@ const EpubReader: React.FC = () => {
           <Button
             variant="bordered"
             className="text-base rounded-md w-40 dark:bg-neutral-900"
-            onClick={handlePrevChapter}>
+            onPress={handlePrevChapter}>
             {t('previous')}
           </Button>
           <Button
             variant="bordered"
             className="text-base rounded-md w-40 dark:bg-neutral-900"
-            onClick={handleNextChapter}>
+            onPress={handleNextChapter}>
             {t('next')}
           </Button>
         </div>

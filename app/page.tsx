@@ -1,28 +1,28 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import DoubleColumnRenderer from "@/components/Renderer/DoubleColumnRenderer";
-import epubStructureParser from "@/utils/epubStructureParser";
-import Image from "next/image";
-import { DownloadIcon } from "@/components/ui/download";
-import { Github } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { Button } from "@heroui/button";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
-import { Input } from "@heroui/input";
-import SingleColumnRenderer from "@/components/Renderer/SingleColumnRenderer";
-import { useRendererModeStore } from "@/store/rendererModeStore";
-import { defaultBookInfo, useBookInfoStore, DefaultBookType } from "@/store/bookInfoStore";
-import { useBookZipStore } from "@/store/bookZipStore";
-import { loadZip } from "@/utils/zipUtils";
+import { useRef } from 'react';
+import DoubleColumnRenderer from '@/components/Renderer/DoubleColumnRenderer';
+import epubStructureParser from '@/utils/epubStructureParser';
+import Image from 'next/image';
+import { DownloadIcon } from '@/components/ui/download';
+import { Github } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { Button } from '@heroui/button';
+import LocaleSwitcher from '@/components/LocaleSwitcher';
+import { Input } from '@heroui/input';
+import SingleColumnRenderer from '@/components/Renderer/SingleColumnRenderer';
+import { useRendererModeStore } from '@/store/rendererModeStore';
+import { defaultBookInfo, useBookInfoStore, DefaultBookType } from '@/store/bookInfoStore';
+import { useBookZipStore } from '@/store/bookZipStore';
+import { loadZip } from '@/utils/zipUtils';
 
 function App() {
   const locale = useLocale();
-  const t = useTranslations("HomePage");
-  const rendererMode = useRendererModeStore((state) => state.rendererMode);
-  const bookInfo = useBookInfoStore((state) => state.bookInfo);
-  const setBookInfo = useBookInfoStore((state) => state.setBookInfo);
-  const setBookZip = useBookZipStore((state) => state.setBookZip);
+  const t = useTranslations('HomePage');
+  const rendererMode = useRendererModeStore(state => state.rendererMode);
+  const bookInfo = useBookInfoStore(state => state.bookInfo);
+  const setBookInfo = useBookInfoStore(state => state.setBookInfo);
+  const setBookZip = useBookZipStore(state => state.setBookZip);
   const books = defaultBookInfo[locale];
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -63,7 +63,7 @@ function App() {
       };
 
       reader.onerror = () => {
-        reject(new Error("Error reading file"));
+        reject(new Error('Error reading file'));
       };
 
       reader.readAsArrayBuffer(file);
@@ -71,7 +71,7 @@ function App() {
   }
 
   const handleDownload = (fileUrl: string, fileName: string) => {
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = fileUrl;
     link.download = fileName;
     document.body.appendChild(link);
@@ -82,7 +82,7 @@ function App() {
   return (
     <>
       {bookInfo.title ? (
-        rendererMode === "single" ? (
+        rendererMode === 'single' ? (
           <SingleColumnRenderer />
         ) : (
           <DoubleColumnRenderer />
@@ -102,8 +102,8 @@ function App() {
                 />
                 <div className="flex w-full justify-between">
                   <div>
-                    <Button className="bg-black text-white" radius="sm" onClick={handleButtonClick}>
-                      {t("selectEpub")}
+                    <Button className="bg-black text-white" radius="sm" onPress={handleButtonClick}>
+                      {t('selectEpub')}
                     </Button>
                   </div>
 
@@ -114,10 +114,9 @@ function App() {
                       isIconOnly
                       variant="shadow"
                       radius="sm"
-                      onClick={() =>
-                        window.open("https://github.com/jhao0413/react-epub-parser", "_blank")
-                      }
-                    >
+                      onPress={() =>
+                        window.open('https://github.com/jhao0413/react-epub-parser', '_blank')
+                      }>
                       <Github size={16} />
                     </Button>
                   </div>
@@ -131,17 +130,16 @@ function App() {
                     height={60}
                     alt=""
                   />
-                  <h1 className="text-3xl font-bold ml-2">{t("title")}</h1>
+                  <h1 className="text-3xl font-bold ml-2">{t('title')}</h1>
                 </div>
-                <p>{t("introduction")}</p>
-                <p className="font-bold text-xl mt-4">{t("example")}</p>
+                <p>{t('introduction')}</p>
+                <p className="font-bold text-xl mt-4">{t('example')}</p>
                 <div className="flex mt-2">
                   {books.map((book: DefaultBookType, index) => (
                     <Button
                       className="mr-2"
                       key={index}
-                      onClick={() => handleDownload(book.url, book.name)}
-                    >
+                      onPress={() => handleDownload(book.url, book.name)}>
                       <DownloadIcon />
                       {book.name}
                     </Button>

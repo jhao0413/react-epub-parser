@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, ChevronLeft, ChevronRight, Github } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Button } from "@heroui/button";
+import { Button } from '@heroui/button';
 import { useBookInfoStore } from '@/store/bookInfoStore';
 import { useCurrentChapterStore } from '@/store/currentChapterStore';
 import { useRendererConfigStore } from '@/store/fontConfigStore';
@@ -20,9 +20,9 @@ import {
 } from '@/utils/iframeHandler';
 import { applyFontAndThemeStyles } from '@/utils/styleHandler';
 import { useRendererModeStore } from '@/store/rendererModeStore';
-import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from "@heroui/modal";
-import { Image } from "@heroui/image";
-import { Tooltip } from "@heroui/tooltip";
+import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@heroui/modal';
+import { Image } from '@heroui/image';
+import { Tooltip } from '@heroui/tooltip';
 import dayjs from 'dayjs';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 const COLUMN_GAP = 100;
@@ -146,8 +146,7 @@ const EpubReader: React.FC = () => {
           <p
             className={`font-bold text-lg font-XiaLuZhenKai ${
               bookInfo.language === 'zh' ? '' : 'italic'
-            }`}
-          >
+            }`}>
             {bookInfo.language === 'zh' ? `《${bookInfo.title}》` : bookInfo.title}
           </p>
         </div>
@@ -158,8 +157,7 @@ const EpubReader: React.FC = () => {
             isIconOnly
             variant="shadow"
             radius="sm"
-            onClick={() => window.open('https://github.com/jhao0413/react-epub-parser', '_blank')}
-          >
+            onPress={() => window.open('https://github.com/jhao0413/react-epub-parser', '_blank')}>
             <Github size={16} className="dark:bg-neutral-900" />
           </Button>
         </div>
@@ -172,8 +170,7 @@ const EpubReader: React.FC = () => {
               radius="full"
               variant="bordered"
               className="bg-white border-2 border-inherit dark:bg-neutral-900"
-              onClick={handlePrevPage}
-            >
+              onPress={handlePrevPage}>
               <ChevronLeft size={16} />
               {t('previous')}
             </Button>
@@ -181,8 +178,7 @@ const EpubReader: React.FC = () => {
               radius="full"
               variant="bordered"
               className="bg-white border-2 border-inherit dark:bg-neutral-900"
-              onClick={handleNextPage}
-            >
+              onPress={handleNextPage}>
               {t('next')}
               <ChevronRight size={16} />
             </Button>
