@@ -49,7 +49,6 @@ const EpubReader: React.FC = () => {
   const currentChapter = useCurrentChapterStore(state => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
-  const [currentChapterSearchResults, setCurrentChapterSearchResults] = useState<{ found: boolean; count: number } | undefined>(undefined);
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
@@ -73,7 +72,6 @@ const EpubReader: React.FC = () => {
         
         highlightText(rendererWindow.document, searchText);
         
-        setCurrentChapterSearchResults(undefined);
         onCloseSearch();
       }
     }
@@ -221,8 +219,7 @@ const EpubReader: React.FC = () => {
     onNext: handleNextPage,
   });
 
-  const handleSearchModalClose = () => {
-    setCurrentChapterSearchResults(undefined);    
+  const handleSearchModalClose = () => {  
     onCloseSearch();
   };
 

@@ -322,6 +322,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@heroui/kbd@npm:^2.2.17":
+  version: 2.2.17
+  resolution: "@heroui/kbd@npm:2.2.17"
+  dependencies:
+    "@heroui/react-utils": "npm:2.1.11"
+    "@heroui/shared-utils": "npm:2.1.9"
+    "@heroui/system-rsc": "npm:2.3.15"
+  peerDependencies:
+    "@heroui/theme": ">=2.4.6"
+    react: ">=18 || >=19.0.0-rc.0"
+    react-dom: ">=18 || >=19.0.0-rc.0"
+  checksum: 10c0/b642c917c6b6ae4eafabc888f73684e0a7a4414d9747df5a544c2c75241205e809d188d9c19e4b03ee7ab23eb41bd2983b7df2ca9c591a1d0fd81b6cc2cc76e9
+  languageName: node
+  linkType: hard
+
 "@heroui/menu@npm:2.2.10":
   version: 2.2.10
   resolution: "@heroui/menu@npm:2.2.10"
@@ -417,6 +432,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@heroui/react-rsc-utils@npm:2.1.8":
+  version: 2.1.8
+  resolution: "@heroui/react-rsc-utils@npm:2.1.8"
+  peerDependencies:
+    react: ">=18 || >=19.0.0-rc.0"
+  checksum: 10c0/37af1e236b0adb8cce15277aa5cdee5dc564b59439b5c3eb561c4e8142005f265527d814a8dc249ed49d85faf0db80d68c62bef436e22aa8e973efb6e47d1171
+  languageName: node
+  linkType: hard
+
+"@heroui/react-utils@npm:2.1.11":
+  version: 2.1.11
+  resolution: "@heroui/react-utils@npm:2.1.11"
+  dependencies:
+    "@heroui/react-rsc-utils": "npm:2.1.8"
+    "@heroui/shared-utils": "npm:2.1.9"
+  peerDependencies:
+    react: ">=18 || >=19.0.0-rc.0"
+  checksum: 10c0/b64b54bfdac50e99bc71c4a45b6eda68fa9af18102058a498d846985ba43cc3956fd8ca89865b3d30bc82ee4ce075b38def9c430ee83adf1580081377fcd12f0
+  languageName: node
+  linkType: hard
+
 "@heroui/react-utils@npm:2.1.4":
   version: 2.1.4
   resolution: "@heroui/react-utils@npm:2.1.4"
@@ -462,6 +498,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@heroui/shared-utils@npm:2.1.9":
+  version: 2.1.9
+  resolution: "@heroui/shared-utils@npm:2.1.9"
+  checksum: 10c0/336f641c48fdab0b1633f0bab4ce559de95a4cc994c0287741dbfce6050d47cf8ec13130ba94671cd7aecba8771a2e14d368d3e5f299aedbeecdae1dddf873f1
+  languageName: node
+  linkType: hard
+
 "@heroui/slider@npm:2.4.8":
   version: 2.4.8
   resolution: "@heroui/slider@npm:2.4.8"
@@ -497,6 +540,19 @@ __metadata:
     react: ">=18 || >=19.0.0-rc.0"
     react-dom: ">=18 || >=19.0.0-rc.0"
   checksum: 10c0/af6ae8c208cc32f7ab8df4b4f34b94697c9eb92412dda7626ef00de56d7549ddb7d58fff0b041d4c87747a9219099b467c26162e849f88e91c99e9c122384313
+  languageName: node
+  linkType: hard
+
+"@heroui/system-rsc@npm:2.3.15":
+  version: 2.3.15
+  resolution: "@heroui/system-rsc@npm:2.3.15"
+  dependencies:
+    "@react-types/shared": "npm:3.30.0"
+    clsx: "npm:^1.2.1"
+  peerDependencies:
+    "@heroui/theme": ">=2.4.6"
+    react: ">=18 || >=19.0.0-rc.0"
+  checksum: 10c0/a71ca8608d6f27742cfa0ff3962db6f1e9ce3cb6853745faaea240d99f47279066c6dbe36239cf1b6c3f2a2d611d86b9ec74adf5dd3cf92d9548b75b3482a6b0
   languageName: node
   linkType: hard
 
@@ -2311,6 +2367,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-types/shared@npm:3.30.0":
+  version: 3.30.0
+  resolution: "@react-types/shared@npm:3.30.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+  checksum: 10c0/9aa20cc84ffa7d25d3f098255d13cc944924e75e3b0ff73587e307976b2f1feae90058cc34d0fd64342dd9d1835ad3582616135aecdacf5dc35445d7b7ef1996
+  languageName: node
+  linkType: hard
+
 "@react-types/shared@npm:^3.27.0":
   version: 3.27.0
   resolution: "@react-types/shared@npm:3.27.0"
@@ -2611,6 +2676,13 @@ __metadata:
     vue-router:
       optional: true
   checksum: 10c0/2fb4c4a46330949182d6f63691c51310b636fc3cc464bde3c0f24f100b712c3c4ec57a9fedcd6dc3cc75951064b3295b3cb616c80ff7179fbe310cd4314fffaa
+  languageName: node
+  linkType: hard
+
+"@xmldom/xmldom@npm:^0.9.7":
+  version: 0.9.7
+  resolution: "@xmldom/xmldom@npm:0.9.7"
+  checksum: 10c0/d2f44a37bc76f699eebd074c2370a17029f1970252b4337837acb59396386ff5fdafb8a8550194705609d70b38a0453aed356e661893a5b4ae0ca5fe5d6ebaf9
   languageName: node
   linkType: hard
 
@@ -5778,6 +5850,7 @@ __metadata:
     "@heroui/dropdown": "npm:2.3.10"
     "@heroui/image": "npm:2.2.6"
     "@heroui/input": "npm:2.4.10"
+    "@heroui/kbd": "npm:^2.2.17"
     "@heroui/modal": "npm:2.2.8"
     "@heroui/slider": "npm:2.4.8"
     "@heroui/system": "npm:2.4.7"
@@ -5796,6 +5869,7 @@ __metadata:
     "@types/react-dom": "npm:^18"
     "@vercel/analytics": "npm:^1.5.0"
     "@vercel/speed-insights": "npm:^1.2.0"
+    "@xmldom/xmldom": "npm:^0.9.7"
     class-variance-authority: "npm:^0.7.0"
     clsx: "npm:^2.1.1"
     dayjs: "npm:^1.11.13"
