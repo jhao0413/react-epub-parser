@@ -1,4 +1,5 @@
 import { applyFontAndThemeStyles } from "@/utils/styleHandler";
+import { TextPositionMapper } from './textPositionMapper';
 
 export const writeToIframe = (
   updatedChapter: string,
@@ -72,7 +73,9 @@ export const handleIframeLoad = (
   pageCountRef: React.MutableRefObject<number>,
   goToLastPageRef: React.MutableRefObject<boolean>,
   setCurrentPageIndex: React.Dispatch<React.SetStateAction<number>>,
-  COLUMN_GAP: number
+  COLUMN_GAP: number,
+  currentSearchQuery:string,
+  onTextPositionsAnalyzed: any
 ) => {
   renderer.style.visibility = "hidden";
   const handleLoad = () => {
@@ -116,6 +119,13 @@ export const handleIframeLoad = (
         renderer.contentWindow.scrollTo({
           left: 0,
         });
+      }
+
+      const textMapper = new TextPositionMapper(pageWidthRef.current, COLUMN_GAP);
+      const textPositions = textMapper.analyzeTextPositions(iframeDoc);
+      
+      if (onTextPositionsAnalyzed) {
+        onTextPositionsAnalyzed(currentSearchQuery, textPositions);
       }
       renderer.style.visibility = "visible";
 

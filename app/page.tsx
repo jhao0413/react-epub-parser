@@ -32,7 +32,6 @@ function App() {
       inputRef.current.click();
     }
   };
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files?.length) return;

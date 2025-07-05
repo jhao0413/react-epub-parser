@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { BookOpen, ChevronLeft, ChevronRight, Github } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { BookOpen, ChevronLeft, ChevronRight, Github, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@heroui/button';
 import { useBookInfoStore } from '@/store/bookInfoStore';
@@ -25,14 +25,31 @@ import { Image } from '@heroui/image';
 import { Tooltip } from '@heroui/tooltip';
 import dayjs from 'dayjs';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
+import { useTextNavigation } from '@/hooks/useTextNavigation';
+import { useFullBookSearchStore } from '@/store/fullBookSearchStore';
+import { TextPosition, TextPositionMapper } from '@/utils/textPositionMapper';
+import { Input } from '@heroui/input';
+import { Kbd } from '@heroui/kbd';
+import { SearchModal } from './SearchModal';
 const COLUMN_GAP = 100;
 
 const EpubReader: React.FC = () => {
   const t = useTranslations('Renderer');
   const tModal = useTranslations('BookInfoModal');
+  
+  // book info modal
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  // search modal
+  const { 
+    isOpen: isOpenSearch, 
+    onOpen: onOpenSearch, 
+    onClose: onCloseSearch 
+  } = useDisclosure();
+  
   const currentChapter = useCurrentChapterStore(state => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
+  const [currentChapterSearchResults, setCurrentChapterSearchResults] = useState<{ found: boolean; count: number } | undefined>(undefined);
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
@@ -40,8 +57,29 @@ const EpubReader: React.FC = () => {
   const bookInfo = useBookInfoStore(state => state.bookInfo);
   const { theme } = useTheme();
   const bookZip = useBookZipStore(state => state.bookZip);
-  const rendererMode = useRendererModeStore(state => state.rendererMode);
-
+  const rendererMode = useRendererModeStore(state => state.rendererMode);  
+  const { searchAndNavigate, highlightText } = useTextNavigation();
+  const { indexer, setIndexing } = useFullBookSearchStore();
+  
+  const handleTextSearchWithPositions = useCallback((searchText: string, positions: TextPosition[]) => {
+    const targetPage = searchAndNavigate(searchText, positions);
+    if (targetPage) {
+      const rendererWindow = getRendererWindow();
+      if (rendererWindow) {
+        rendererWindow.scrollTo({
+          left: (targetPage - 1) * pageWidthRef.current,
+        });
+        setCurrentPageIndex(targetPage);
+        
+        highlightText(rendererWindow.document, searchText);
+        
+        setCurrentChapterSearchResults(undefined);
+        onCloseSearch();
+      }
+    }
+  }, [searchAndNavigate, onCloseSearch, highlightText]);
+  
+  
   useEffect(() => {
     const processChapter = async () => {
       const { chapterContent, basePath } = await loadChapterContent(
@@ -65,27 +103,45 @@ const EpubReader: React.FC = () => {
         console.error('Iframe document not found');
       }
 
+      const { currentSearchQuery } = useFullBookSearchStore.getState();
+
       return handleIframeLoad(
         renderer,
         pageWidthRef,
         pageCountRef,
         goToLastPageRef,
         setCurrentPageIndex,
-        COLUMN_GAP
+        COLUMN_GAP,
+        currentSearchQuery,
+        handleTextSearchWithPositions
       );
     };
 
     processChapter();
-  }, [bookInfo, bookZip, rendererMode, currentChapter]);
+  }, [bookInfo, bookZip, rendererMode, currentChapter, currentFontConfig, theme, handleTextSearchWithPositions]);
 
+  // book index init 
   useEffect(() => {
-    const renderer = document.getElementById('epub-renderer') as HTMLIFrameElement;
-    if (!renderer || !renderer.contentWindow) {
-      throw new Error('Renderer not found');
-    }
+    const initializeFullBookIndex = async () => {
+      if (!bookZip || !bookInfo.toc.length) {
+        return;
+      }
 
-    applyFontAndThemeStyles(currentFontConfig, theme, rendererMode, COLUMN_GAP);
-  }, [currentFontConfig, theme, rendererMode]);
+      try {
+        setIndexing(true);
+        await indexer.indexFullBook(
+          bookZip, 
+          bookInfo
+        );
+        console.log('full book text index initialized successfully');
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIndexing(false);
+      }
+    };
+    initializeFullBookIndex();
+  }, [bookZip, bookInfo, indexer, setIndexing]);
 
   const getRendererWindow = () => {
     const renderer = document.getElementById('epub-renderer') as HTMLIFrameElement;
@@ -96,6 +152,35 @@ const EpubReader: React.FC = () => {
       return null;
     }
   };
+
+  const handleSearchResultClick = useCallback((resultIndex: number) => {
+    const { searchResults, currentSearchQuery } = useFullBookSearchStore.getState();
+    
+    if (resultIndex >= 0 && resultIndex < searchResults.length) {
+      const result = searchResults[resultIndex];
+      
+      if (result.chapterIndex === currentChapter) {
+        if (currentSearchQuery) {
+          const rendererWindow = getRendererWindow();
+          if (rendererWindow) {
+            const textMapper = new TextPositionMapper(pageWidthRef.current, COLUMN_GAP);
+            const positions = textMapper.analyzeTextPositions(rendererWindow.document);
+            handleTextSearchWithPositions(currentSearchQuery, positions);
+          }
+        }
+      } else {
+        setCurrentChapter(result.chapterIndex);
+      }
+    }
+  }, [setCurrentChapter, currentChapter, handleTextSearchWithPositions]);
+  
+  useEffect(() => {
+    const renderer = document.getElementById('epub-renderer') as HTMLIFrameElement;
+    if (!renderer || !renderer.contentWindow) {
+      throw new Error('Renderer not found');
+    }
+    applyFontAndThemeStyles(currentFontConfig, theme, rendererMode, COLUMN_GAP);
+  }, [currentFontConfig, theme, rendererMode]);
 
   const handleNextPage = () => {
     const rendererWindow = getRendererWindow();
@@ -136,7 +221,10 @@ const EpubReader: React.FC = () => {
     onNext: handleNextPage,
   });
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const handleSearchModalClose = () => {
+    setCurrentChapterSearchResults(undefined);    
+    onCloseSearch();
+  };
 
   return (
     <div className="w-full h-screen bg-gray-100 flex justify-center items-center flex-col dark:bg-neutral-800">
@@ -150,7 +238,19 @@ const EpubReader: React.FC = () => {
             {bookInfo.language === 'zh' ? `《${bookInfo.title}》` : bookInfo.title}
           </p>
         </div>
-        <div>
+        <div className='flex'>
+          <Input
+            className="w-40 mr-4"
+            color="default"
+            radius='full'
+            variant="bordered"
+            placeholder={'Search'}
+            onClick={onOpenSearch}
+            startContent={<Search size={16} />}
+            endContent={<Kbd keys={["ctrl"]}>K</Kbd>}
+            onKeyDown={(e) => {
+            }}
+          />
           <LocaleSwitcher />
           <Button
             className="ml-4 bg-white dark:bg-neutral-900"
@@ -161,7 +261,7 @@ const EpubReader: React.FC = () => {
             <Github size={16} className="dark:bg-neutral-900" />
           </Button>
         </div>
-      </div>
+      </div>      
       <div className="w-4/5 h-[86vh] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
         <div className="h-full relative">
           <iframe id="epub-renderer" style={{ width: '100%', height: '100%' }}></iframe>
@@ -189,6 +289,7 @@ const EpubReader: React.FC = () => {
         </div>
       </div>
 
+      {/* book info */}
       <Modal backdrop="blur" size="2xl" isOpen={isOpen} onClose={onClose} className="pb-6">
         <ModalContent>
           {() => (
@@ -253,6 +354,12 @@ const EpubReader: React.FC = () => {
           )}
         </ModalContent>
       </Modal>
+
+      <SearchModal
+        isOpen={isOpenSearch}
+        onClose={handleSearchModalClose}
+        onSearchResultClick={handleSearchResultClick}
+      />
     </div>
   );
 };
