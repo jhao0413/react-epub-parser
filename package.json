@@ -63,5 +63,5 @@
   "main": "index.js",
   "author": "Jhao <jhao413@qq.com>",
   "license": "MIT",
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "pnpm@9.0.0"
 }
