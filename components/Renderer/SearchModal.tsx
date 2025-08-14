@@ -17,25 +17,16 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   onClose,
   onSearchResultClick,
 }) => {
-  const [searchText, setSearchText] = useState('');
-  const { 
-    searchText: searchFullBook, 
-    searchResults, 
-    currentSearchQuery,
-    isIndexing,
-    clearSearch
-  } = useFullBookSearchStore();
+  const [ searchText, setSearchText ] = useState('');
+  const { searchResults, isIndexing } = useFullBookSearchStore();
+  const { searchText: searchFullBook, currentSearchQuery } = useFullBookSearchStore();
   
   const handleSearch = () => {
     if (!searchText.trim()) return;
 
-    searchFullBook(searchText.trim(), false, null);
+    searchFullBook(searchText.trim());
   };
 
-  const handleClearSearch = () => {
-    setSearchText('');
-    clearSearch();
-  };
   const handleSearchResultClick = (index: number) => {
     onSearchResultClick(index);
     setTimeout(() => {

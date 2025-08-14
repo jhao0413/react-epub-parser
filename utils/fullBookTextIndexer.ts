@@ -23,6 +23,7 @@ export class FullBookTextIndexer {
   private currentBookId: string = '';
 
   constructor() {
+    // full book text index
     this.textIndex = [];
     this.isIndexed = false;
     this.currentBookId = '';
@@ -105,28 +106,18 @@ export class FullBookTextIndexer {
     return chapterDoc.documentElement.outerHTML;
   }
 
-  searchText(query: string, caseSensitive: boolean = false, searchChapter: number | null = null): SearchResult[] {
+  searchText(query: string): SearchResult[] {
     if (!this.isIndexed || !query.trim()) {
       return [];
     }
 
-    if (searchChapter !== null && (searchChapter < 0 || searchChapter >= this.textIndex.length)) {
-      throw new Error("Invalid chapter index for search");
-    }
-
     const results: SearchResult[] = [];
-    const searchQuery = caseSensitive ? query : query.toLowerCase();
+    const searchQuery = query.toLowerCase();
     const seenResults = new Set<string>();
     let textIndex = this.textIndex;
-    console.log(textIndex)
-    if (searchChapter !== null) {
-      textIndex = [this.textIndex[searchChapter]];
-    }
-    
-    console.log(searchChapter)
-    console.log(`Searching for "${searchQuery}" in ${searchChapter} chapters...`);
+    console.log(`Searching for "${searchQuery}" in chapters...`);
     textIndex.forEach((chapter) => {
-      const searchText = caseSensitive ? chapter.searchableText : chapter.searchableText.toLowerCase();
+      const searchText = chapter.searchableText.toLowerCase();
       let startIndex = 0;
 
       while (true) {
@@ -157,12 +148,12 @@ export class FullBookTextIndexer {
           position: index
         });
 
-        // 移动到匹配词之后，避免重叠匹配
+        // move past this match
         startIndex = index + searchQuery.length;
       }
     });
 
-    // 按章节索引和位置排序
+    // sort results by chapter index and position
     results.sort((a, b) => {
       if (a.chapterIndex !== b.chapterIndex) {
         return a.chapterIndex - b.chapterIndex;
@@ -170,7 +161,7 @@ export class FullBookTextIndexer {
       return a.position - b.position;
     });
 
-    console.log(results)
+    console.info('Search results:', results);
 
     return results;
   }

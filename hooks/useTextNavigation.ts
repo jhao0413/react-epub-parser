@@ -4,13 +4,11 @@ import { useFullBookSearchStore } from '@/store/fullBookSearchStore';
 
 export const useTextNavigation = () => {
   const [textPositions, setTextPositions] = useState<TextPosition[]>([]);
-  const [currentHighlight, setCurrentHighlight] = useState<string | null>(null);
-  const { searchText, searchResults, currentSearchQuery } = useFullBookSearchStore();
 
   const updateTextPositions = useCallback((positions: TextPosition[]) => {
     setTextPositions(positions);
   }, []);
-  // 当前章节搜索（保持原有功能）
+  // Search for text in the provided positions and navigate to the first match
   const searchAndNavigate = useCallback((searchText: string, positions?: TextPosition[]): number | null => {
     const positionsToSearch = positions || textPositions;
     console.log('Searching in positions:', positionsToSearch);
@@ -19,16 +17,12 @@ export const useTextNavigation = () => {
     );
     
     if (position) {
-      setCurrentHighlight(searchText);
-      return position.pageIndex + 1; // 返回页面索引（从1开始）
+      // return the page index of the found position
+      return position.pageIndex + 1;
     }
     
     return null;
   }, [textPositions]);
-  
-  const searchFullBook = useCallback((query: string) => {
-    searchText(query, false, null);
-  }, [searchText]);
 
   const highlightText = useCallback((iframeDoc: Document, searchText: string) => {
     if (!searchText.trim()) return;
@@ -75,7 +69,7 @@ export const useTextNavigation = () => {
       if (parts.length > 1) {
         const parent = node.parentNode;
         if (parent) {
-          parts.forEach((part, index) => {
+          parts.forEach((part) => {
             if (part) {
               if (regex.test(part)) {
                 const highlight = iframeDoc.createElement('span');
@@ -94,27 +88,10 @@ export const useTextNavigation = () => {
     });
   }, []);  
   
-  const clearHighlight = useCallback((iframeDoc: Document) => {
-    const existingHighlights = iframeDoc.querySelectorAll('.epub-highlight');
-    existingHighlights.forEach(el => {
-      const parent = el.parentNode;
-      if (parent) {
-        parent.insertBefore(iframeDoc.createTextNode(el.textContent || ''), el);
-        parent.removeChild(el);
-      }
-    });
-    iframeDoc.normalize();
-    setCurrentHighlight(null);
-  }, []);
-
   return {
     textPositions,
     updateTextPositions,
     searchAndNavigate,
-    searchFullBook,
-    highlightText,
-    clearHighlight,
-    currentHighlight,
-    currentSearchQuery,
+    highlightText
   };
 };

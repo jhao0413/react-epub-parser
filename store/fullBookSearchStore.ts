@@ -9,8 +9,7 @@ interface FullBookSearchStore {
   currentSearchQuery: string;
   
   setIndexing: (isIndexing: boolean) => void;
-  searchText: (query: string, caseSensitive: boolean,  searchChapter: number | null ) => void;
-  clearSearch: () => void;
+  searchText: (query: string) => void;
   clearIndex: () => void;
 }
 
@@ -23,14 +22,14 @@ export const useFullBookSearchStore = create<FullBookSearchStore>((set, get) => 
 
   setIndexing: (isIndexing: boolean) => set({ isIndexing }),
   
-  searchText: (query: string, caseSensitive: boolean = false, searchChapter: number | null = null) => {
+  searchText: (query: string) => {
     const { indexer } = get();
     if (!query.trim()) {
       set({ searchResults: [], currentSearchQuery: '' });
       return;
     }
 
-    const results = indexer.searchText(query, caseSensitive, searchChapter);
+    const results = indexer.searchText(query);
     
     const uniqueResults = results.filter((result, index, array) => {
       const resultKey = `${result.chapterIndex}-${result.position}-${result.matchText}`;
@@ -44,11 +43,6 @@ export const useFullBookSearchStore = create<FullBookSearchStore>((set, get) => 
       currentSearchQuery: query 
     });
   },
-
-  clearSearch: () => set({ 
-    searchResults: [], 
-    currentSearchQuery: '' 
-  }),
 
   clearIndex: () => {
     const { indexer } = get();
