@@ -19,7 +19,7 @@ import { useTranslations } from 'next-intl';
 import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@heroui/modal';
 import { Image } from '@heroui/image';
 import { Tooltip } from '@heroui/tooltip';
-import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import dayjs from 'dayjs';
 
 const EpubReader: React.FC = () => {
@@ -102,7 +102,7 @@ const EpubReader: React.FC = () => {
     setCurrentChapter(currentChapter + 1);
   };
 
-  useKeyboardNavigation({
+  useKeyboardShortcuts({
     onPrevious: handlePrevChapter,
     onNext: handleNextChapter,
   });

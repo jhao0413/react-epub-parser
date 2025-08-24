@@ -9,14 +9,17 @@ interface KeyboardShortcuts {
 export const useKeyboardShortcuts = ({ onPrevious, onNext, onSearch }: KeyboardShortcuts) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // check for ctrl+K
-      if (event.ctrlKey && event.key === 'k' && onSearch) {
+      // Check for Ctrl+K or Cmd+K (macOS)
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isShortcut = isMac ? event.metaKey : event.ctrlKey;
+      
+      if (isShortcut && event.key === 'k' && onSearch) {
         event.preventDefault();
         onSearch();
         return;
       }
       
-      // navigation keys
+      // Original navigation keys
       if (event.key === 'ArrowLeft') {
         onPrevious();
       } else if (event.key === 'ArrowRight' || event.key === 'Space') {

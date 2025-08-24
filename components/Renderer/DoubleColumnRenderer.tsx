@@ -24,7 +24,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, useDisclosure } from '@her
 import { Image } from '@heroui/image';
 import { Tooltip } from '@heroui/tooltip';
 import dayjs from 'dayjs';
-import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useTextNavigation } from '@/hooks/useTextNavigation';
 import { useFullBookSearchStore } from '@/store/fullBookSearchStore';
 import { TextPosition, TextPositionMapper } from '@/utils/textPositionMapper';
@@ -219,9 +219,10 @@ const EpubReader: React.FC = () => {
     }
   };
 
-  useKeyboardNavigation({
+  useKeyboardShortcuts({
     onPrevious: handlePrevPage,
     onNext: handleNextPage,
+    onSearch: onOpenSearch,
   });
 
   return (
@@ -259,7 +260,9 @@ const EpubReader: React.FC = () => {
             <Github size={16} className="dark:bg-neutral-900" />
           </Button>
         </div>
-      </div>      
+      </div>
+
+      {/* renderer */}
       <div className="w-4/5 h-[86vh] bg-white p-14 mt-4 rounded-2xl dark:bg-neutral-900">
         <div className="h-full relative">
           <iframe id="epub-renderer" style={{ width: '100%', height: '100%' }}></iframe>
