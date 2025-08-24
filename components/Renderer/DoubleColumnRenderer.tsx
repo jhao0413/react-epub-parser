@@ -45,16 +45,21 @@ const EpubReader: React.FC = () => {
     onOpen: onOpenSearch, 
     onClose: onCloseSearch 
   } = useDisclosure();
-  
+
+  // page state
   const currentChapter = useCurrentChapterStore(state => state.currentChapter);
   const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);
+
+  // font and theme
   const currentFontConfig = useRendererConfigStore(state => state.rendererConfig);
-  const bookInfo = useBookInfoStore(state => state.bookInfo);
   const { theme } = useTheme();
+
+  // epub book info and zip
+  const bookInfo = useBookInfoStore(state => state.bookInfo);
   const bookZip = useBookZipStore(state => state.bookZip);
   const rendererMode = useRendererModeStore(state => state.rendererMode);  
   const { searchAndNavigate, highlightText } = useTextNavigation();
@@ -219,10 +224,6 @@ const EpubReader: React.FC = () => {
     onNext: handleNextPage,
   });
 
-  const handleSearchModalClose = () => {  
-    onCloseSearch();
-  };
-
   return (
     <div className="w-full h-screen bg-gray-100 flex justify-center items-center flex-col dark:bg-neutral-800">
       <div className="flex w-4/5 h-12 justify-between items-center">
@@ -308,7 +309,7 @@ const EpubReader: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex flex-col w-[50%]">
                     <Tooltip content={bookInfo.title}>
                       <h2 className="font-bold truncate w-[90%] text-2xl font-XiaLuZhenKai mb-2">
                         {bookInfo.title}
@@ -354,7 +355,7 @@ const EpubReader: React.FC = () => {
 
       <SearchModal
         isOpen={isOpenSearch}
-        onClose={handleSearchModalClose}
+        onClose={onCloseSearch}
         onSearchResultClick={handleSearchResultClick}
       />
     </div>
