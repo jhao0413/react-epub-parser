@@ -10,8 +10,11 @@ export const useTextNavigation = () => {
   }, []);
   // Search for text in the provided positions and navigate to the first match
   const searchAndNavigate = useCallback((searchText: string, positions?: TextPosition[]): number | null => {
+    if (!searchText.trim()) {
+      return null;
+    }
+    
     const positionsToSearch = positions || textPositions;
-    console.log('Searching in positions:', positionsToSearch);
     const position = positionsToSearch.find(pos => 
       pos.text.toLowerCase().includes(searchText.toLowerCase())
     );

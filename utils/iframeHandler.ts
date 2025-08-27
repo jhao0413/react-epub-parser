@@ -114,7 +114,7 @@ export const handleIframeLoad = (
           left: (pageCountRef.current - 1) * pageWidthRef.current,
         });
         goToLastPageRef.current = false;
-        setCurrentPageIndex(Math.ceil(scrollWidth / pageWidthRef.current));
+        setCurrentPageIndex(pageCountRef.current);
       } else {
         renderer.contentWindow.scrollTo({
           left: 0,
