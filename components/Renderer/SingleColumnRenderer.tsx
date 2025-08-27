@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { Button } from '@heroui/button';
 import { useBookInfoStore } from '@/store/bookInfoStore';
-import { useCurrentChapterStore } from '@/store/currentChapterStore';
+import { useReaderStateStore } from '@/store/readerStateStore';
 import { useRendererConfigStore } from '@/store/fontConfigStore';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
 import { BookOpen, Github } from 'lucide-react';
@@ -25,8 +25,8 @@ import dayjs from 'dayjs';
 const EpubReader: React.FC = () => {
   const t = useTranslations('SingleColumnRenderer');
   const tModal = useTranslations('BookInfoModal');
-  const currentChapter = useCurrentChapterStore(state => state.currentChapter);
-  const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
+  const currentChapter = useReaderStateStore(state => state.currentChapter);
+  const setCurrentChapter = useReaderStateStore(state => state.setCurrentChapter);
   const currentFontConfig = useRendererConfigStore(state => state.rendererConfig);
   const bookInfo = useBookInfoStore(state => state.bookInfo);
   const { theme } = useTheme();

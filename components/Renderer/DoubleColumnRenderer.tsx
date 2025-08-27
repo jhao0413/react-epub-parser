@@ -5,7 +5,7 @@ import { BookOpen, ChevronLeft, ChevronRight, Github, Search } from 'lucide-reac
 import { useTranslations } from 'next-intl';
 import { Button } from '@heroui/button';
 import { useBookInfoStore } from '@/store/bookInfoStore';
-import { useCurrentChapterStore } from '@/store/currentChapterStore';
+import { useReaderStateStore } from '@/store/readerStateStore';
 import { useRendererConfigStore } from '@/store/fontConfigStore';
 import { Toolbar } from '@/components/Renderer/Toolbar/Index';
 import LocaleSwitcher from '@/components/LocaleSwitcher';
@@ -47,9 +47,11 @@ const EpubReader: React.FC = () => {
   } = useDisclosure();
 
   // page state
-  const currentChapter = useCurrentChapterStore(state => state.currentChapter);
-  const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
-  const [currentPageIndex, setCurrentPageIndex] = useState(1);
+  const currentChapter = useReaderStateStore(state => state.currentChapter);
+  const currentPageIndex = useReaderStateStore(state => state.currentPageIndex);
+  const setCurrentChapter = useReaderStateStore(state => state.setCurrentChapter);
+  const setCurrentPageIndex = useReaderStateStore(state => state.setCurrentPageIndex);
+
   const goToLastPageRef = useRef(false);
   const pageWidthRef = useRef(0);
   const pageCountRef = useRef(0);

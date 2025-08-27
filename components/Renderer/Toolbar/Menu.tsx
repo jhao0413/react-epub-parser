@@ -5,7 +5,7 @@ import { MenuIcon } from '@/components/ui/menu';
 import { Tooltip } from "@heroui/tooltip";
 import { useRendererModeStore } from '@/store/rendererModeStore';
 import { useBookInfoStore } from '@/store/bookInfoStore';
-import { useCurrentChapterStore } from '@/store/currentChapterStore';
+import { useReaderStateStore } from '@/store/readerStateStore';
 import { useTheme } from 'next-themes';
 
 const Menu: React.FC = () => {
@@ -13,8 +13,10 @@ const Menu: React.FC = () => {
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const mode = useRendererModeStore(state => state.rendererMode);
   const bookInfo = useBookInfoStore(state => state.bookInfo);
-  const currentChapter = useCurrentChapterStore(state => state.currentChapter);
-  const setCurrentChapter = useCurrentChapterStore(state => state.setCurrentChapter);
+  const currentChapter = useReaderStateStore(state => state.currentChapter);
+  const currentPageIndex = useReaderStateStore(state => state.currentPageIndex);
+  const setCurrentChapter = useReaderStateStore(state => state.setCurrentChapter);
+  const setCurrentPageIndex = useReaderStateStore(state => state.setCurrentPageIndex);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -85,7 +87,11 @@ const Menu: React.FC = () => {
                     theme === 'dark' ? 'hover:bg-neutral-600' : 'hover:bg-blue-50'
                   }  dark:text-white cursor-pointer	`}>
                   <a
-                    onClick={() => setCurrentChapter(index)}
+                    onClick={() => {
+                      handleOverlayClick()
+                      setCurrentChapter(index)
+                      setCurrentPageIndex(1)
+                    }}
                     className={`block text-sm ${
                       currentChapter === index ? 'text-blue-500' : 'text-slate-500 dark:text-white'
                     }`}>

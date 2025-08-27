@@ -72,7 +72,7 @@ export const handleIframeLoad = (
   pageWidthRef: React.MutableRefObject<number>,
   pageCountRef: React.MutableRefObject<number>,
   goToLastPageRef: React.MutableRefObject<boolean>,
-  setCurrentPageIndex: React.Dispatch<React.SetStateAction<number>>,
+  setCurrentPageIndex: (pageIndex: number) => void,
   COLUMN_GAP: number,
   currentSearchQuery:string,
   onTextPositionsAnalyzed: any
