@@ -22,5 +22,15 @@
         "publicationDate": "Publication Date",
         "size": "Size",
         "language": "Language"
+    },
+    "SearchModal": {
+        "title": "Search",
+        "placeholder": "Enter search content...",
+        "searchButton": "Search",
+        "chapterFormat": "Chapter {chapterNumber}: {chapterTitle}",
+        "resultsFound": "Found {count} search results",
+        "noResultsFound": "No content found containing \"{query}\"",
+        "tryOtherKeywords": "Please try other keywords",
+        "searchInBook": "Search keywords in the book"
     }
 }

@@ -22,5 +22,15 @@
         "publicationDate": "出版时间",
         "size": "文件大小",
         "language": "语言"
+    },
+    "SearchModal": {
+        "title": "搜索",
+        "placeholder": "输入搜索内容...",
+        "searchButton": "搜索",
+        "chapterFormat": "第 {chapterNumber} 章: {chapterTitle}",
+        "resultsFound": "找到 {count} 个搜索结果",
+        "noResultsFound": "未找到包含 \"{query}\" 的内容",
+        "tryOtherKeywords": "请尝试其他关键词",
+        "searchInBook": "在书中搜索关键词"
     }
 }
