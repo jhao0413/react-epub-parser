@@ -117,9 +117,10 @@ const EpubReader: React.FC = () => {
           <div className="flex items-center cursor-pointer" onClick={onOpen}>
             <BookOpen size={20} />
             <p
-              className={`font-bold text-lg font-XiaLuZhenKai ${
+              className={`font-bold text-lg font-XiaLuZhenKai max-w-lg truncate ${
                 bookInfo.language === 'zh' ? '' : 'italic'
-              }`}>
+              }`}
+              title={bookInfo.language === 'zh' ? `《${bookInfo.title}》` : bookInfo.title}>
               {bookInfo.language === 'zh' ? `《${bookInfo.title}》` : bookInfo.title}
             </p>
           </div>
@@ -179,8 +180,8 @@ const EpubReader: React.FC = () => {
                       src={bookInfo.coverBlob ? URL.createObjectURL(bookInfo.coverBlob) : ''}
                     />
                   </div>
-
-                  <div className="flex flex-col">
+      
+                  <div className="flex flex-col w-[50%]">
                     <Tooltip content={bookInfo.title}>
                       <h2 className="font-bold truncate w-[90%] text-2xl font-XiaLuZhenKai mb-2">
                         {bookInfo.title}
